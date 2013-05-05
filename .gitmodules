@@ -1,0 +1,6 @@
+[submodule "src/lib/external/phirehose"]
+	path = src/lib/external/phirehose
+	url = git://github.com/fennb/phirehose.git
+[submodule "src/lib/external/bitcoin-php"]
+	path = src/lib/external/bitcoin-php
+	url = git://github.com/mikegogulski/bitcoin-php.git
