@@ -4,3 +4,6 @@
 [submodule "src/lib/external/bitcoin-php"]
 	path = src/lib/external/bitcoin-php
 	url = git://github.com/mikegogulski/bitcoin-php.git
+[submodule "src/lib/external/simpletest"]
+	path = src/lib/external/simpletest
+	url = git://github.com/git-mirror/simpletest.git
