@@ -1,0 +1,2 @@
+The puppet manifest here can be called directly with 
+sudo puppet site.pp
