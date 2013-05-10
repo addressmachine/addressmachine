@@ -303,14 +303,15 @@ class AddressMachineBitcoinKey {
     }
 
     function toJSON() {
-        $obj = new stdClass();
-        $obj->address = $this->address;    
-        return json_encode($obj);
-    }
 
-    function fromJSON($file_contents) {
-        $obj = json_decode($file_contents);
-        $this->address - $obj->address;
+        $obj = new stdClass();
+        $payload = new stdClass(); // Wrap the data in a separate payload object. The only other thing we have should be the signature.
+        $payload->address = $this->address;    
+        $obj->gpg_signature = AddressMachineBitcoinKey::PayloadSignature($payload);
+        $obj->payload = $payload;
+        
+        return json_encode($obj);
+
     }
 
     function path() {
@@ -345,9 +346,23 @@ class AddressMachineBitcoinKey {
 
     }
 
-    function sign() {
+    static function PayloadSignature($payload) {
 
-        return false;
+        $json = json_encode($payload);
+        require_once 'Crypt/GPG.php';
+
+        $gpg = new Crypt_GPG(array('homedir' => ADDRESSMACHINE_GPG_ROOT));
+        $gpg->addSignKey('admin@addressmachine.com', '');
+        $signature = $gpg->sign($json, Crypt_GPG::SIGN_MODE_CLEAR);
+
+/*
+        $gnupg = new gnupg();
+        $gnupg->setsignmode(gnupg::SIG_MODE_CLEAR);
+        $gnupg->addsignkey("8660281B6051D071D94B5B230549F9DC851566DC","");
+        $sig = $gnupg->sign($json);
+        */
+
+        return $signature;
 
     }
 
@@ -365,7 +380,19 @@ class AddressMachineBitcoinKey {
 
     function isSignatureValid() {
 
-        return false;
+        if (!$filename = $this->filename()) {
+            syslog(LOG_DEBUG, "File {$this->filename()} does not exist, cannot validate signature.");
+            return false;
+        }
+
+        $contents = file_get_contents($filename);
+        var_dump($contents);
+
+        $json = json_decode($contents);
+        $payload = $json->payload;
+        $gpg_signature = $json->gpg_signature;
+
+        return $gpg_signature == AddressMachineBitcoinKey::PayloadSignature($payload);
 
     }
 

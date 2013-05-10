@@ -12,6 +12,17 @@ require_once(ADDRESSMACHINE_LIB_ROOT.'/address/address.inc.php');
 
 class AddressMachineAddressTest extends UnitTestCase {
 
+    function testGPGSignatures() {
+
+        $payload = new stdClass();
+        $payload->address = '12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
+
+        $sig = AddressMachineBitcoinKey::PayloadSignature($payload);
+        //var_dump($sig);
+
+
+    }
+
     function testTwitterIdentity() {
 
         $id = AddressMachineTwitterIdentity::ForIdentifier('edmundedgar');
@@ -20,7 +31,6 @@ class AddressMachineAddressTest extends UnitTestCase {
 
         $this->assertTrue(is_array($addresses));
         $this->assertEqual(count($addresses), 0, 'No addresses for user at start of test');
-        var_dump($addresses);
 
         // If there's something left over from previous broken test runs, delete.
         foreach($addresses as $addr) {
@@ -31,9 +41,11 @@ class AddressMachineAddressTest extends UnitTestCase {
 
         $this->assertNotNull($key);
         $this->assertIsA($key, 'AddressMachineBitcoinKey');
+
+        $this->assertTrue($key->isSignatureValid());
+
         $this->assertTrue($key->delete());
         $this->assertFalse($key->delete());
-
 
     }
 
