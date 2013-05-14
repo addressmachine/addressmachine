@@ -12,25 +12,24 @@ class AddressMachineTwitterCommand {
     var $action;
 
     var $availableActionClasses = array(
-        'GIVE'   => 'AddressMachineGiveAction', // lookup or create
+        //'TEMP'   => 'AddressMachineTempAction', // lookup or create temporary
         'LOOKUP' => 'AddressMachineLookupAction', // lookup only
         'ADD'    => 'AddressMachineAddAction', // register a new address
         'DELETE' => 'AddressMachineDeleteAction', // delete an address
-        'REVOKE' => 'AddressMachineRevokeAction', // mark an address revoked
+        'ERROR' => 'AddressMachineErrorAction', // parsing error etc
+        // 'REVOKE' => 'AddressMachineRevokeAction', // mark an address revoked TODO
         'DIE'    => 'AddressMachineDieAction', // delete everything we have on this user
     );
 
     function execute() {
         
-        if (!$this->parse()) {
-            print "Error: could not parse";            
-        }
+        $this->parse();
 
-            print "continuing with action {$this->action}";
+        //print "continuing with action {$this->action}";
 
         if (!$handler = $this->action()) {
             print "error: no handler for action ";
-            return false;
+            return null;
         }
 
         return $handler->execute();
@@ -46,18 +45,21 @@ class AddressMachineTwitterCommand {
         // action parameter
         // ...or
         // parameter
+
+        if ( ( count($bits) == 0 ) || ( $bits[0] != '@'.ADDRESSMACHINE_SCREEN_NAME ) ) {
+            // Not for us, ignore without even making a response.
+            return false;
+        }
+
         if (count($bits) <= 1) {
-            print "too few bits";
+            //print "too few bits";
+            $this->action = 'ERROR';
             return false;
         }
 
         if (count($bits) > 3) {
-            print "too many bits";
-            return false;
-        }
-
-        if ($bits[0] != '@'.ADDRESSMACHINE_SCREEN_NAME) {
-            print "first bit mismtach";
+            //print "too many bits";
+            $this->action = 'ERROR';
             return false;
         }
 
@@ -72,10 +74,10 @@ class AddressMachineTwitterCommand {
 
         // They didn't tell us what to do specifically, so see if we can guess.
 
-        // Messaging just a @twittername is a 'GIVE'
+        // Messaging just a @twittername is a 'LOOKUP'
         if (preg_match('/@[A-Za-z0-9_]{1,15}/', $bits[1])) {
-            // Just a twitter handle. Default to GIVE.
-            $this->action = 'GIVE';
+            // Just a twitter handle. Default to TEMP.
+            $this->action = 'LOOKUP';
             $this->parameter = $bits[1];
             return true;
         }
@@ -88,6 +90,7 @@ class AddressMachineTwitterCommand {
         }
 
         // Don't know what you were trying to do, give up.
+        $this->action = 'ERROR';
         return false;
     
     }
@@ -133,8 +136,9 @@ abstract class AddressMachineAction {
     var $user_id;
     var $screen_name;
 
-    public function tweetResponse($text) {
-        print "trying to tweet $text";
+    public function response($text) {
+
+        //print "trying to tweet $text";
 
         if (!$this->screen_name) {
             print "no screen namme";
@@ -146,12 +150,11 @@ abstract class AddressMachineAction {
         }
 
         $text = '@'.$this->screen_name.' '.$text;
-        print "trying to tweet text: $text";
 
         $tweet = new AddressMachineTwitterUpdate();
         $tweet->in_reply_to_status_id = $this->id;
         $tweet->text = $text;
-        return $tweet->send();
+        return $tweet;
 
     }
 
@@ -160,12 +163,40 @@ abstract class AddressMachineAction {
 
 }
 
-class AddressMachineGiveAction extends AddressMachineAction {
+class AddressMachineLookupAction extends AddressMachineAction {
 
     public function execute() {
-        print "TODO: do actual lookup";
+
+        $identifier = $this->parameter;
+
+        $id = AddressMachineTwitterIdentity::ForIdentifier($identifier);
+        $keys = $id->userBitcoinKeys();
+
+        $text = '';
+
+        if (count($keys) == 0) {
+            //$text = $identifier.' has not registered a Bitcoin address yet. Tweet "@addressmachine '.$identifier.' TEMP" to make a temporary one.';
+            $text = $identifier.' has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.';
+        }
+
+        if (!$text) {
+            // TODO: Think about the method of choosing between multiple keys.
+            $key = $keys[0];
+            $text = 'You can pay '.$identifier .' at '.$key->address;
+        }
+
+        return $this->response($text);
+
+    }
+
+}
+
+class AddressMachineTempAction extends AddressMachineAction {
+
+    public function execute() {
+        print "TODO: do actual lookup, or create an address if it fails";
         $text = 'test';
-        return $this->tweetResponse($text);
+        return $this->response($text);
     }
 
 }
@@ -174,25 +205,95 @@ class AddressMachineAddAction extends AddressMachineAction {
 
     public function execute() {
         
+        $text = '';
+
         $addr = $this->parameter;
+
         if ($addr == '') {
-            print "Missing parameter";
-            return false;
+            $text = 'Please tweet @addressmachine ADD address'; 
         }
 
-        if (!Bitcoin::checkAddress($addr)) {
-            print "Address $addr not like a real address";
-            return false;
+        if (!$text && !Bitcoin::checkAddress($addr)) {
+            $text = $addr.' does not look like a real Bitcoin address.';
+        }
+    
+        $id = null;
+        if (!$text && !$id = AddressMachineTwitterIdentity::ForIdentifier('@'.$this->screen_name)) {
+            $text = 'Sorry, something went wrong.';
         }
 
-        print "TODO: do actual add";
-        $text = 'test';
-        return $this->tweetResponse($text);
+        if (!$text) {
+            syslog(LOG_INFO, "Trying to add address $addr");
+            if ( !$key = $id->addUserBitcoinKeyByAddress($addr)) {
+                $text = 'Sorry, something went wrong.';
+            } else {
+                //$text = 'I have added the address $addr. You can delete it later with "@addressmachine DELETE '.$addr.'"';
+                $text = 'I have added the address '.$addr.' for you.';
+            }
+            syslog(LOG_INFO, "Done trying to add address $addr");
+        }
+
+
+        return $this->response($text);
 
     }
 
 }
 
+class AddressMachineDeleteAction extends AddressMachineAction {
+
+    public function execute() {
+        
+        $text = '';
+
+        $addr = $this->parameter;
+
+        if ($addr == '') {
+            $text = 'Please tweet "@addressmachine DELETE address", substituting "address" for a Bitcoin address.'; 
+        }
+
+        if (!$text && !Bitcoin::checkAddress($addr)) {
+            $text = $addr.' does not look like a real Bitcoin address.';
+        }
+    
+        $id = null;
+        if (!$text && !$id = AddressMachineTwitterIdentity::ForIdentifier('@'.$this->screen_name)) {
+            $text = 'Sorry, something went wrong.';
+        }
+
+        if (!$text && !$key = $id->userBitcoinKeyForAddress($addr)) {
+            $text = 'The address '.$addr.' was not registered in the first place.';
+        }
+
+        if ( !$text && !$key->delete() ) {
+            $text = 'Sorry, something went wrong, I could not delete the address'.$addr;
+        }
+
+        if (!$text) {
+            //$text = 'I have added the address $addr. You can delete it later with "@addressmachine DELETE '.$addr.'"';
+            $text = 'I have deleted the address '.$addr.' for you.';
+        }
+
+        return $this->response($text);
+
+    }
+
+}
+
+// NB This only gets called if we have a resonable attempt at a message to us.
+class AddressMachineErrorAction extends AddressMachineAction {
+
+    public function execute() {
+        
+        if ($this->screen_name) {
+            return $this->response('Sorry, I could not understand that tweet.');
+        }
+
+        return null;
+
+    }
+
+}
 
 
 ////////////////////////////////////////////////
@@ -233,7 +334,6 @@ class AddressMachineTwitterUpdate {
         )
         ));
         $result = file_get_contents(ADDRESSMACHINE_TWITTER_UPDATE_STATUS_URL, false, $context);
-        var_dump($result);
 
     }
 

@@ -5,10 +5,8 @@ abstract class AddressMachineIdentity {
 
     var $service;
     var $identifier;
-    var $gpg_private_key;
 
     abstract static public function ForIdentifier($i);
-
 
     function pathToSignedTempFiles() {
         
@@ -17,7 +15,7 @@ abstract class AddressMachineIdentity {
             return null;
         }
 
-        return AddressMachineBitcoinKey::PathToSignedFiles($this->identifier, 'temp', $this->service);
+        return AddressMachinePaymentKey::PathToSignedFiles($this->identifier, 'temp', $this->service, 'bitcoin');
 
     }
 
@@ -28,7 +26,7 @@ abstract class AddressMachineIdentity {
             return null;
         }
 
-        return AddressMachineBitcoinKey::PathToSignedFiles($this->identifier, 'user', $this->service);
+        return AddressMachinePaymentKey::PathToSignedFiles($this->identifier, 'user', $this->service, 'bitcoin');
 
     }
 
@@ -65,7 +63,7 @@ abstract class AddressMachineIdentity {
             return null;
         }
 
-        if (!$dir = AddressMachineBitcoinKey::PathToSignedFiles($identifier, $service, $keytype)) {
+        if (!$dir = AddressMachinePaymentKey::PathToSignedFiles($identifier, $service, $keytype, 'bitcoin')) {
             syslog(LOG_WARNING, "Cannot get bitcoinKeysForType - could not get path to signed files");
             return null;
         }
@@ -92,11 +90,12 @@ abstract class AddressMachineIdentity {
                 continue;
             }
 
-            $key = new AddressMachineBitcoinKey();
+            $key = new AddressMachinePaymentKey();
             $key->address = $entry;
             $key->identifier = $this->identifier;
             $key->service = $this->service;
             $key->keytype = $keytype;
+            $key->paymenttype = 'bitcoin';
             $ret[] = $key;
 
             syslog(LOG_DEBUG, "Found address entry for $entry .");
@@ -121,6 +120,22 @@ abstract class AddressMachineIdentity {
         
     }
 
+    function tempBitcoinKeyCreateIfNecessary() {
+
+        $keys = $this->tempBitcoinKeys();
+
+        if (count($keys) == 0) {
+            return $this->createTempBitcoinKey();
+        }
+
+        return $keys[0];
+
+    }
+
+    function createTempBitcoinKey() {
+
+    }
+
     function tempBitcoinKeyForAddress($addr) {
 
         return $this->bitcoinKeyForAddressAndKeyType($addr, ADDRESSMACHINE_KEY_TYPE_TEMP);
@@ -128,7 +143,7 @@ abstract class AddressMachineIdentity {
     }
 
     function addUserBitcoinKeyByAddress($addr) {
-       
+
         return $this->addBitcoinKeyByAddressAndKeyType($addr, ADDRESSMACHINE_KEY_TYPE_USER);
         
     }
@@ -146,11 +161,12 @@ abstract class AddressMachineIdentity {
             return false;
         }
         
-        $key = new AddressMachineBitcoinKey();
+        $key = new AddressMachinePaymentKey();
         $key->identifier = $this->identifier;
         $key->address = $addr;
         $key->keytype = ADDRESSMACHINE_KEY_TYPE_USER;
         $key->service = $this->service;
+        $key->paymenttype = 'bitcoin';
 
         if ($key->create()) {
             return $key;
@@ -166,14 +182,15 @@ abstract class AddressMachineIdentity {
             return false;
         }
         
-        $key = new AddressMachineBitcoinKey();
+        $key = new AddressMachinePaymentKey();
         $key->identifier = $this->identifier;
         $key->address = $addr;
         $key->keytype = ADDRESSMACHINE_KEY_TYPE_USER;
         $key->service = $this->service;
+        $key->paymenttype = 'bitcoin';
 
         if ($key->exists()) {
-            return key;
+            return $key;
         }
 
         return null;
@@ -208,12 +225,13 @@ class AddressMachineEmailIdentity extends AddressMachineIdentity {
 // Internally we call what is commonly called an "address" a key.
 // This allows us to differentiate it from the address, which is the hash of the public key.
 // In practice we will mostly manage addresses.
-class AddressMachineBitcoinKey {
+class AddressMachinePaymentKey {
 
     var $address;
     var $identifier;
     var $keytype;
     var $service;
+    var $paymenttype;
 
     function exists() {
 
@@ -273,7 +291,7 @@ class AddressMachineBitcoinKey {
         fputs($handle, $contents);
         fclose($handle);
 
-        syslog(LOG_INFO, "Wrote new address $path.");
+        syslog(LOG_INFO, "Wrote new address $file.");
 
         return true;
 
@@ -307,7 +325,9 @@ class AddressMachineBitcoinKey {
         $obj = new stdClass();
         $payload = new stdClass(); // Wrap the data in a separate payload object. The only other thing we have should be the signature.
         $payload->address = $this->address;    
-        $obj->gpg_signature = AddressMachineBitcoinKey::PayloadSignature($payload);
+        $payload->service = $this->service;    
+        $payload->paymenttype = $this->paymenttype;    
+        $obj->gpg_signature = AddressMachinePaymentKey::PayloadSignature($payload);
         $obj->payload = $payload;
         
         return json_encode($obj);
@@ -321,7 +341,7 @@ class AddressMachineBitcoinKey {
             return null;
         }
 
-        if (!$path = AddressMachineBitcoinKey::PathToSignedFiles($this->identifier, $this->service, $this->keytype)) {
+        if (!$path = AddressMachinePaymentKey::PathToSignedFiles($this->identifier, $this->service, $this->keytype, $this->paymenttype)) {
             syslog(LOG_WARNING, "Could not get path to signed files.");
             return null;
         }
@@ -348,31 +368,19 @@ class AddressMachineBitcoinKey {
 
     static function PayloadSignature($payload) {
 
+        require_once 'Crypt/GPG.php'; // From PEAR - the puppet install file should install this on Ubuntu.
+
         $json = json_encode($payload);
-        require_once 'Crypt/GPG.php';
 
         $gpg = new Crypt_GPG(array('homedir' => ADDRESSMACHINE_GPG_ROOT));
         $gpg->addSignKey('admin@addressmachine.com', '');
         $signature = $gpg->sign($json, Crypt_GPG::SIGN_MODE_CLEAR);
-
-/*
-        $gnupg = new gnupg();
-        $gnupg->setsignmode(gnupg::SIG_MODE_CLEAR);
-        $gnupg->addsignkey("8660281B6051D071D94B5B230549F9DC851566DC","");
-        $sig = $gnupg->sign($json);
-        */
 
         return $signature;
 
     }
 
     function revoke() {
-
-        return false;
-
-    }
-
-    function save() {
 
         return false;
 
@@ -386,13 +394,14 @@ class AddressMachineBitcoinKey {
         }
 
         $contents = file_get_contents($filename);
-        var_dump($contents);
 
         $json = json_decode($contents);
         $payload = $json->payload;
         $gpg_signature = $json->gpg_signature;
 
-        return $gpg_signature == AddressMachineBitcoinKey::PayloadSignature($payload);
+        syslog(LOG_WARNING, "TODO: Fix validation to work with just the public key");
+
+        return $gpg_signature == AddressMachinePaymentKey::PayloadSignature($payload);
 
     }
 
@@ -402,7 +411,7 @@ class AddressMachineBitcoinKey {
 
     }
 
-    public static function PathToSignedFiles($identifier, $service, $keytype) {
+    public static function PathToSignedFiles($identifier, $service, $keytype, $paymenttype) {
         
         if (!$identifier) {
             syslog(LOG_WARNING, "No identifier supplied when trying to get path to signed files.");
@@ -433,13 +442,23 @@ class AddressMachineBitcoinKey {
             syslog(LOG_WARNING, "Empty service path for service type $service when trying to get path to signed files.");
             return null;
         }
+
+        $paymenttype_paths = array(
+            'bitcoin'  => 'bitcoin',
+            'litecoin' => 'litecoin',
+        );
+
+        if (!$paymenttype_path  = $paymenttype_paths[$paymenttype]) {
+            syslog(LOG_WARNING, "Payment type {$paymenttype} not known, no path for it.");
+            return null;
+        }
         
-        if (!$hash = AddressMachineBitcoinKey::IdentifierHash($identifier)) {
+        if (!$hash = AddressMachinePaymentKey::IdentifierHash($identifier)) {
             syslog(LOG_WARNING, "Could not make hash for identifier $identifier when trying to get path to signed files.");
             return null;
         }
 
-        return $service_path.'/'.$keytype.'/'.AddressMachineBitcoinKey::IdentifierHash($identifier);
+        return $service_path.'/'.$paymenttype_path.'/'.$keytype.'/'.AddressMachinePaymentKey::IdentifierHash($identifier);
 
     }
 

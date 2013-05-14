@@ -1,10 +1,15 @@
 <?php
+
+define('ADDRESSMACHINE_IS_DEVEL_ENVIRONMENT', 1);
+
 require_once(dirname(__FILE__).'/../../config.php');
 
 require_once(ADDRESSMACHINE_LIB_ROOT_EXTERNAL.'/phirehose/lib/Phirehose.php');
 require_once(ADDRESSMACHINE_LIB_ROOT_EXTERNAL.'/phirehose/lib/UserstreamPhirehose.php');
 require_once(ADDRESSMACHINE_LIB_ROOT_EXTERNAL.'/bitcoin-php/src/bitcoin.inc');
+
 require_once(ADDRESSMACHINE_LIB_ROOT.'/twitter/twitter.inc.php');
+require_once(ADDRESSMACHINE_LIB_ROOT.'/address/address.inc.php');
 
 /**
  * Barebones example of using UserstreamPhirehose.
@@ -63,7 +68,10 @@ class MyUserConsumer extends UserstreamPhirehose
     $cmd->user_id = $data['user']['id'];
     $cmd->text = $data['text'];
     $cmd->id = $data['id'];
-    $cmd->execute();
+
+    if ($response = $cmd->execute()) {
+        $response->send();
+    }
 
     //echo date("Y-m-d H:i:s (").strlen($status)."):".print_r($data,true)."\n";
   }
