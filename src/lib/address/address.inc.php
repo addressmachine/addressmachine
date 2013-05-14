@@ -15,7 +15,7 @@ abstract class AddressMachineIdentity {
             return null;
         }
 
-        return AddressMachinePaymentKey::PathToSignedFiles($this->identifier, 'temp', $this->service, 'bitcoin');
+        return AddressMachinePaymentKey::PathToSignedFiles($this->identifier, null, 'temp', $this->service, 'bitcoin');
 
     }
 
@@ -26,7 +26,7 @@ abstract class AddressMachineIdentity {
             return null;
         }
 
-        return AddressMachinePaymentKey::PathToSignedFiles($this->identifier, 'user', $this->service, 'bitcoin');
+        return AddressMachinePaymentKey::PathToSignedFiles($this->identifier, null, 'user', $this->service, 'bitcoin');
 
     }
 
@@ -63,7 +63,7 @@ abstract class AddressMachineIdentity {
             return null;
         }
 
-        if (!$dir = AddressMachinePaymentKey::PathToSignedFiles($identifier, $service, $keytype, 'bitcoin')) {
+        if (!$dir = AddressMachinePaymentKey::PathToSignedFiles($identifier, null, $service, $keytype, 'bitcoin')) {
             syslog(LOG_WARNING, "Cannot get bitcoinKeysForType - could not get path to signed files");
             return null;
         }
@@ -229,9 +229,23 @@ class AddressMachinePaymentKey {
 
     var $address;
     var $identifier;
+    var $identifierhash; // On the publisher server we use this because we don't know the unhashed identifier
     var $keytype;
     var $service;
     var $paymenttype;
+
+    static public function ForStdClass($obj) {
+
+        $key = new AddressMachinePaymentKey();
+        $key->address = $obj->address;
+        $key->identifierhash = $obj->identifierhash;
+        $key->keytype = $obj->keytype;
+        $key->service = $obj->service;
+        $key->paymenttype = $obj->paymenttype;
+
+        return $key;
+
+    }
 
     function exists() {
 
@@ -244,11 +258,31 @@ class AddressMachinePaymentKey {
 
     }
 
+    function write_file($file, $contents) {
+
+        if (!$handle = fopen($file, 'w')) {
+                syslog(LOG_ERR, "Could not open file $file to write.");
+                return false;
+        }
+        if (!flock($handle, 2)) {
+            fclose($handle);
+            syslog(LOG_ERR, "Could not lock file $file to write.");
+            return false;
+        }
+        fputs($handle, $contents);
+        fclose($handle);
+
+        return true;
+
+    }
+
     function create() {
 
         if (!$address = $this->address) {
-            syslog(LOG_WARNING, "Cannot create file for address - address not set.");
-            return false;
+            if (!$publisher) {
+                syslog(LOG_WARNING, "Cannot create file for address - address not set.");
+                return false;
+            }
         }
 
         if ($this->exists()) {
@@ -279,17 +313,14 @@ class AddressMachinePaymentKey {
         $file = $path.'/'.$address;
         $contents = $this->toJSON();
 
-        if (!$handle = fopen($file, 'w')) {
-                syslog(LOG_ERR, "Could not open file $file to write.");
-                return false;
-        }
-        if (!flock($handle, 2)) {
-            fclose($handle);
-            syslog(LOG_ERR, "Could not lock file $file to write.");
+        if (!$this->write_file($file, $contents)) {
+            syslog(LOG_ERR, "Failed to write file $file.");
             return false;
         }
-        fputs($handle, $contents);
-        fclose($handle);
+
+        if (!AddressMachinePublisherClient::Publish($contents, $file)) {
+            syslog(LOG_WARNING, "Publishing $file failed");
+        }
 
         syslog(LOG_INFO, "Wrote new address $file.");
 
@@ -309,7 +340,8 @@ class AddressMachinePaymentKey {
             return false;
         }
 
-        if (!@unlink($file)) {
+    
+        if (!$this->delete_file($file)) {
             syslog(LOG_ERR, "Could not delete file $file.");
             return false;
         }
@@ -320,13 +352,21 @@ class AddressMachinePaymentKey {
 
     }
 
+    function delete_file($file) {
+
+        return @unlink($file);
+
+    }
+
     function toJSON() {
 
         $obj = new stdClass();
         $payload = new stdClass(); // Wrap the data in a separate payload object. The only other thing we have should be the signature.
         $payload->address = $this->address;    
+        $payload->keytype = $this->keytype;    
         $payload->service = $this->service;    
         $payload->paymenttype = $this->paymenttype;    
+        $payload->identifierhash = AddressMachinePaymentKey::IdentifierHash($this->identifier);
         $obj->gpg_signature = AddressMachinePaymentKey::PayloadSignature($payload);
         $obj->payload = $payload;
         
@@ -334,14 +374,14 @@ class AddressMachinePaymentKey {
 
     }
 
-    function path() {
+    function path($publisher = false) {
 
         if (!$address = $this->address) {
             syslog(LOG_WARNING, "No address, can't make filename.");
             return null;
         }
 
-        if (!$path = AddressMachinePaymentKey::PathToSignedFiles($this->identifier, $this->service, $this->keytype, $this->paymenttype)) {
+        if (!$path = AddressMachinePaymentKey::PathToSignedFiles($this->identifier, $this->identifierhash, $this->service, $this->keytype, $this->paymenttype, $publisher)) {
             syslog(LOG_WARNING, "Could not get path to signed files.");
             return null;
         }
@@ -350,14 +390,14 @@ class AddressMachinePaymentKey {
 
     }
 
-    function filename() {
+    function filename($publisher = false) {
 
         if (!$address = $this->address) {
             syslog(LOG_WARNING, "Could not make filename - address not set.");
             return null;
         }
 
-        if (!$path= $this->path()) {
+        if (!$path= $this->path($publisher)) {
             syslog(LOG_WARNING, "Could not make filename - could not get path to signed files.");
             return null;
         }
@@ -411,9 +451,10 @@ class AddressMachinePaymentKey {
 
     }
 
-    public static function PathToSignedFiles($identifier, $service, $keytype, $paymenttype) {
-        
-        if (!$identifier) {
+    // The publisher flag allows us to use the same class to get information about where the file would live on our publishing server.
+    // This will follow the same conventions and just have a different data root, although in theory it doesn't have to.
+    public static function PathToSignedFiles($identifier = null, $identifierhash = null, $service, $keytype, $paymenttype, $publisher = false) {
+        if (!$identifier && !$identifierhash) {
             syslog(LOG_WARNING, "No identifier supplied when trying to get path to signed files.");
             return null;
         }
@@ -429,8 +470,8 @@ class AddressMachinePaymentKey {
         }
 
         $service_paths = array(
-            'twitter' => ADDRESSMACHINE_DATA_DIRECTORY_TWITTER,
-            'email'   => ADDRESSMACHINE_DATA_DIRECTORY_EMAIL,
+            'twitter' => $publisher ? ADDRESSMACHINE_PUBLICATION_DIRECTORY_TWITTER : ADDRESSMACHINE_DATA_DIRECTORY_TWITTER,
+            'email'   => $publisher ? ADDRESSMACHINE_PUBLICATION_DIRECTORY_EMAIL : ADDRESSMACHINE_DATA_DIRECTORY_EMAIL,
         );
 
         if (!isset($service_paths[$service])) {
@@ -453,12 +494,21 @@ class AddressMachinePaymentKey {
             return null;
         }
         
-        if (!$hash = AddressMachinePaymentKey::IdentifierHash($identifier)) {
+        if ($identifierhash) {
+            if ($identifier) {
+                if ($identifierhash != AddressMachinePaymentKey::IdentifierHash($identifier)) {
+                    syslog(LOG_WARNING, "Identifier $identifier and identifier hash $identifierhash both set, but don't match");
+                    return null;
+                }
+            }
+        }
+
+        if (!$identifierhash && !$identifierhash = AddressMachinePaymentKey::IdentifierHash($identifier)) {
             syslog(LOG_WARNING, "Could not make hash for identifier $identifier when trying to get path to signed files.");
             return null;
         }
 
-        return $service_path.'/'.$paymenttype_path.'/'.$keytype.'/'.AddressMachinePaymentKey::IdentifierHash($identifier);
+        return $service_path.'/'.$paymenttype_path.'/'.$keytype.'/'.$identifierhash;
 
     }
 

@@ -11,8 +11,64 @@ require_once(ADDRESSMACHINE_LIB_ROOT_EXTERNAL.'/bitcoin-php/src/bitcoin.inc');
 
 require_once(ADDRESSMACHINE_LIB_ROOT.'/twitter/twitter.inc.php');
 require_once(ADDRESSMACHINE_LIB_ROOT.'/address/address.inc.php');
+require_once(ADDRESSMACHINE_LIB_ROOT.'/publisher/client.inc.php');
+require_once(ADDRESSMACHINE_LIB_ROOT.'/publisher/server.inc.php');
 
 class AddressMachineAddressTest extends UnitTestCase {
+
+    function testPublisherWebService() {
+        
+        // Upload
+        $key = new AddressMachinePaymentKey();
+        $key->address = '12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
+        $key->service = 'twitter';
+        $key->identifier = '@exampletwitteruserthatistoolongtobearealtwitteruser';
+        $key->paymenttype = 'bitcoin';
+        $key->keytype = ADDRESSMACHINE_KEY_TYPE_USER;
+        $contents = $key->toJson();
+        //var_dump($contents);
+
+        $upload_result = AddressMachinePublisherClient::Publish($contents);
+        $this->assertTrue($upload_result);
+        $filename = $key->filename(true);
+        $this->assertTrue(file_exists($filename));
+
+        $delete_result = AddressMachinePublisherClient::UnPublish($contents);
+        $this->assertTrue($delete_result);
+
+$this->assertTrue(false, 'TODO: Handle failures properly');
+        // TODO: Handle failures properly
+
+        //var_dump($upload_result);
+        return;
+
+
+        
+
+        // Download
+        $published_path = ADDRESSMACHINE_PUBLICATION_DATA_DIRECTORY.'/data/addresses/twitter/bitcoin/user/8aaaefb7fabbVwFo2gU';
+
+        $id = AddressMachineTwitterIdentity::ForIdentifier('@edmundedgar');
+        $addresses = $id->userBitcoinKeys();
+        $this->assertTrue(is_array($addresses));
+        $this->assertEqual(count($addresses), 0, 'No addresses for user at start of test');
+
+        // If there's something left over from previous broken test runs, delete.
+        foreach($addresses as $addr) {
+            $this->assertTrue($addr->delete(), 'Delete OK');
+        }
+
+        $key = $id->addUserBitcoinKeyByAddress('12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
+
+        $this->assertNotNull($key);
+        $this->assertIsA($key, 'AddressMachinePaymentKey');
+
+        $filename = $key->fileName();
+
+        $this->assertTrue($key->isSignatureValid());
+        $this->assertTrue($key->delete());
+
+    }
 
     function testGPGSignatures() {
 
@@ -55,12 +111,11 @@ class AddressMachineAddressTest extends UnitTestCase {
 
         // @edmundedgar data should end up here:
         $published_path = ADDRESSMACHINE_PUBLICATION_DATA_DIRECTORY.'/data/addresses/twitter/bitcoin/user/8aaaefb7fabbVwFo2gU';
-        $this->assertTrue(file_exists($published_path), 'File has been published to publishing server');
+        //$this->assertTrue(file_exists($published_path), 'File has been published to publishing server');
 
 
         $this->assertTrue($key->delete());
         $this->assertFalse($key->delete());
-        //$this->assertFalse(file_exists($published_path), 'File has been removed from publishing server');
 
     }
 
@@ -168,7 +223,6 @@ class AddressMachineAddressTest extends UnitTestCase {
         return;
 
     }
-
 
 
     function testEmailCommands() {
