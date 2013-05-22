@@ -47,9 +47,9 @@ class AddressMachinePublisherClient {
         curl_setopt($handle, CURLOPT_POSTFIELDS, $json_contents);
 
         $response = curl_exec($handle);
-        print ".....\n";
-        print $response;
-        print "\n.....\n";
+        //print ".....\n";
+        //print $response;
+        //print "\n.....\n";
         $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         return $response;
  

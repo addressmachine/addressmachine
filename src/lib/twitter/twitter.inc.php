@@ -11,14 +11,14 @@ class AddressMachineTwitterCommand {
 
     var $action;
 
-    var $availableActionClasses = array(
-        //'TEMP'   => 'AddressMachineTempAction', // lookup or create temporary
-        'LOOKUP' => 'AddressMachineLookupAction', // lookup only
-        'ADD'    => 'AddressMachineAddAction', // register a new address
-        'DELETE' => 'AddressMachineDeleteAction', // delete an address
-        'ERROR' => 'AddressMachineErrorAction', // parsing error etc
-        // 'REVOKE' => 'AddressMachineRevokeAction', // mark an address revoked TODO
-        'DIE'    => 'AddressMachineDieAction', // delete everything we have on this user
+    var $availableTwitterActionClasses = array(
+        //'TEMP'   => 'AddressMachineTempTwitterAction', // lookup or create temporary
+        'LOOKUP' => 'AddressMachineLookupTwitterAction', // lookup only
+        'ADD'    => 'AddressMachineAddTwitterAction', // register a new address
+        'DELETE' => 'AddressMachineDeleteTwitterAction', // delete an address
+        'ERROR' => 'AddressMachineErrorTwitterAction', // parsing error etc
+        // 'REVOKE' => 'AddressMachineRevokeTwitterAction', // mark an address revoked TODO
+        'DIE'    => 'AddressMachineDieTwitterAction', // delete everything we have on this user
     );
 
     function execute() {
@@ -66,7 +66,7 @@ class AddressMachineTwitterCommand {
         // See if the first word is an action.
         // If they tell us what to do, just pass the next parameter to the relevant class
         // ...and let it figure out if it's valid.
-        if (isset($this->availableActionClasses[strtoupper($bits[1])])) {
+        if (isset($this->availableTwitterActionClasses[strtoupper($bits[1])])) {
             $this->action = strtoupper($bits[1]);
             $this->parameter = $bits[2];
             return true;
@@ -95,7 +95,7 @@ class AddressMachineTwitterCommand {
     
     }
 
-    // return a subclass of AddressMachineAction
+    // return a subclass of AddressMachineTwitterAction
     function action() {
 
         if (is_null($this->action)) {
@@ -105,12 +105,12 @@ class AddressMachineTwitterCommand {
             return null;
         }
 
-        $availableActionClasses = $this->availableActionClasses;
-        if (!isset($availableActionClasses[$action])) {
+        $availableTwitterActionClasses = $this->availableTwitterActionClasses;
+        if (!isset($availableTwitterActionClasses[$action])) {
             return null; 
         }
 
-        $cls = $availableActionClasses[$action];
+        $cls = $availableTwitterActionClasses[$action];
         $obj = new $cls();
         $obj->screen_name = $this->screen_name;
         $obj->user_id = $this->user_id;
@@ -128,7 +128,7 @@ class AddressMachineTwitterCommand {
 // ...followed by a class for each action.
 //
 
-abstract class AddressMachineAction {
+abstract class AddressMachineTwitterAction {
 
     var $text;
     var $parameter;
@@ -163,7 +163,7 @@ abstract class AddressMachineAction {
 
 }
 
-class AddressMachineLookupAction extends AddressMachineAction {
+class AddressMachineLookupTwitterAction extends AddressMachineTwitterAction {
 
     public function execute() {
 
@@ -191,7 +191,7 @@ class AddressMachineLookupAction extends AddressMachineAction {
 
 }
 
-class AddressMachineTempAction extends AddressMachineAction {
+class AddressMachineTempTwitterAction extends AddressMachineTwitterAction {
 
     public function execute() {
         print "TODO: do actual lookup, or create an address if it fails";
@@ -201,7 +201,7 @@ class AddressMachineTempAction extends AddressMachineAction {
 
 }
 
-class AddressMachineAddAction extends AddressMachineAction {
+class AddressMachineAddTwitterAction extends AddressMachineTwitterAction {
 
     public function execute() {
         
@@ -240,7 +240,7 @@ class AddressMachineAddAction extends AddressMachineAction {
 
 }
 
-class AddressMachineDeleteAction extends AddressMachineAction {
+class AddressMachineDeleteTwitterAction extends AddressMachineTwitterAction {
 
     public function execute() {
         
@@ -281,7 +281,7 @@ class AddressMachineDeleteAction extends AddressMachineAction {
 }
 
 // NB This only gets called if we have a resonable attempt at a message to us.
-class AddressMachineErrorAction extends AddressMachineAction {
+class AddressMachineErrorTwitterAction extends AddressMachineTwitterAction {
 
     public function execute() {
         
