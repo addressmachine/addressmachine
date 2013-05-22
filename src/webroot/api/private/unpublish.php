@@ -1,5 +1,10 @@
 <?php
 require_once(dirname(__FILE__).'/../../../config.php');
+
+// Print not-authorized headers and exit unless auth details ok
+// You may want to remove this and set the check it at the web server level instead.
+require_once(dirname(__FILE__).'/include/access.inc.php');
+
 require_once(ADDRESSMACHINE_LIB_ROOT.'/address/address.inc.php');
 
 //syslog(LOG_WARNING, "----in publish---");

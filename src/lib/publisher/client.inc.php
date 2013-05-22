@@ -11,6 +11,7 @@ class AddressMachinePublisherClient {
         $handle = curl_init();
         curl_setopt($handle, CURLOPT_URL, ADDRESSMACHINE_PUBLICATION_PUBLISH_URL);
         curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($handle, CURLOPT_USERPWD, ADDRESSMACHINE_PUBLICATION_USERNAME.':'.ADDRESSMACHINE_PUBLICATION_PASSWORD);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
@@ -37,6 +38,7 @@ class AddressMachinePublisherClient {
         $handle = curl_init();
         curl_setopt($handle, CURLOPT_URL, ADDRESSMACHINE_PUBLICATION_UNPUBLISH_URL);
         curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($handle, CURLOPT_USERPWD, ADDRESSMACHINE_PUBLICATION_USERNAME.':'.ADDRESSMACHINE_PUBLICATION_PASSWORD);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);

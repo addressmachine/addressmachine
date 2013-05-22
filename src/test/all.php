@@ -36,7 +36,8 @@ class AddressMachineAddressTest extends UnitTestCase {
         $delete_result = AddressMachinePublisherClient::UnPublish($contents);
         $this->assertTrue($delete_result);
 
-$this->assertTrue(false, 'TODO: Handle failures properly');
+        $delete_result = AddressMachinePublisherClient::UnPublish($contents);
+        $this->assertFalse($delete_result, 'UnPublish returns false on second unpublish');
         // TODO: Handle failures properly
 
         //var_dump($upload_result);
