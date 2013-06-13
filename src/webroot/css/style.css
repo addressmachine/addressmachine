@@ -99,10 +99,12 @@ a:link, a:visited {
     color: #285935;
     text-decoration: none;
     outline: 0;
+    font-weight:bold;
 }
 a:hover, a:focus, a:active {
     color: #5E1F00;
     text-decoration: underline;
+    font-weight:bold;
 }
 
 /* Headers */

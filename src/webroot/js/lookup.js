@@ -60,7 +60,7 @@ function display_no_address(service, term) {
     document.getElementById('lookup_result_term').innerHTML = 'We couldn\'t find an address for:<br />';
     document.getElementById('lookup_result_term').appendChild(document.createTextNode(term));
     if (service == 'email') {
-        document.getElementById('lookup_result_term').innerHTML += '<br />Why not <a href="mailto:'+term+'">ask them to add one</a>?';
+        document.getElementById('lookup_result_term').innerHTML += '<br />Why not <a href="mailto:'+term+'?subject=I%20Want%20To%20Send%20You%20Bitcoins&body=I%20tried%20to%20find%20a%20Bitcoin%20address%20for%20you%20at%20www.addressmachine.com%20but%20you%20were%20not%20listed.%20Why%20not%20add%20one?">ask them to add one</a>?';
     }
     if (service == 'twitter') {
         document.getElementById('lookup_result_term').innerHTML += '<br />Why not <a href="https://www.twitter.com/'+term+'">ask them to add one</a>?';
