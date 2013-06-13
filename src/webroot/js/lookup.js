@@ -21,7 +21,7 @@ document.getElementById('lookupform').onsubmit = function() {
     }
     var hash = hex_sha1(q);
     var r = new XMLHttpRequest();
-    r.open('GET', '/addresses/'+service+'/bitcoin/user/'+hash+'/', true);
+    r.open('GET', 'http://lookup.addressmachine.com/addresses/'+service+'/bitcoin/user/'+hash+'/', true);
 
     r.onreadystatechange = function () {
 
