@@ -60,3 +60,8 @@ Permissions and writable directories:
 
  C) Website should just serve static HTML. Nothing needs to be writable by the web server user, and no script execution needs to be allowed.
 
+
+Logging
+ 
+ The Bot Box and the API Server / Data Store will log to syslog. On Ubuntu this goes to /var/log/syslog, but you can configure syslog to send it somewhere else.
+
