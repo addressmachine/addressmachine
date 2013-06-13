@@ -43,7 +43,7 @@ class AddressMachineEmailCommand {
 
     }
 
-    public static function UnhashedConfirmationCommand($str, $user_email, $service_email) {
+    public static function UnhashedConfirmationCommand($str, $user_email, $action) {
 
         $str = base64_decode($str);
 
@@ -51,29 +51,32 @@ class AddressMachineEmailCommand {
         $bits = explode(" ", $str);
         $hash = array_pop($bits);
         $payload = join(" ", $bits);
-        if (AddressMachineEmailCommand::CommandHash($payload, $user_email, $service_email) != $hash) {
+        //var_dump($payload);
+        if (AddressMachineEmailCommand::CommandHash($payload, $user_email, $action) != $hash) {
             syslog(LOG_WARNING, "Hash mismatch in string $str");
             return '';
         }
+
+        //print "UnhashedConfirmationCommand returning :$payload:";
 
         return $payload;
 
     }
 
-    function HashedConfirmationCommand($str, $user_email, $service_email) {
+    function HashedConfirmationCommand($str, $user_email, $action) {
 
-        $sig = AddressMachineEmailCommand::CommandHash($str, $user_email, $service_email);
+        $sig = AddressMachineEmailCommand::CommandHash($str, $user_email, $action);
         $str .= ' '.$sig;
         return base64_encode($str);
 
     }
 
-    public static function CommandHash($str, $user_email, $service_email) {
+    public static function CommandHash($str, $user_email, $action) {
 
         // Tack the user email and service email onto the end...
         // ...so that the code only works for that mail address and that action.
         $str .= $user_email;
-        $str .= $service_email;
+        $str .= $action;
         return hash_hmac( 'sha256', $str, ADDRESSMACHINE_EMAIL_CONFIRMATION_SECRET );
 
     }
@@ -90,7 +93,17 @@ class AddressMachineEmailCommand {
     function parse() {
 
         // Get the action from the address the email arrived at
-        $verb = strtoupper($this->service_email);
+        if (!$service_email = $this->service_email) {
+            print "WARN: no service email";
+            return false;
+        }
+
+        $service_email_user = ''; 
+        if (preg_match('/^(.*?)\@.*$/', $service_email, $matches)) {
+            $service_email_user = $matches[1];
+        }
+
+        $verb = strtoupper($service_email_user);
 
         // If they tell us what to do, just pass the next parameter to the relevant class
         // ...and let it figure out if it's valid.
@@ -109,40 +122,25 @@ class AddressMachineEmailCommand {
 
         $confirm_pattern = '/'.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.'('.$base_64_pattern.')'.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_SUFFIX.'/';
 
+        // Confirmation commands should contain the action , eg ADD, then the parameter, eg a Bitcoin address
         if (preg_match($confirm_pattern, $this->text, $matches)) {
             // Throw away the rest and use the matching bit
-            $this->text = AddressMachineEmailCommand::UnhashedConfirmationCommand($matches[1], $this->user_email, $this->service_email);
+            $this->text = AddressMachineEmailCommand::UnhashedConfirmationCommand($matches[1], $this->user_email, $this->action);
+            //var_dump($this->text);
             $this->is_confirmation = true;
+            $bits = explode(" ", $this->text);
+            $this->parameter = $bits[1];
         }
 
-        // TODO: Handle HTML email etc
-        $bits = explode(' ', $this->text);
-
-        // There should be 1 or 2 bits in a valid message:
-        // action parameter
-        // ...or
-        // parameter
-
-        if (count($bits) < 1) {
-            //print "too few bits";
-            $this->action = 'ERROR';
-            return false;
+        $lines = explode("\n", $this->text);
+        foreach($lines as $line) {
+            $line = preg_replace( '/[^[:print:]]/', '',$line);
+            if (preg_match('/(^1[1-9A-Za-z][^OIl]{20,40})/', $line, $matches)) {
+                //print "got address :".$matches[1].":\n";
+                $this->parameter = $matches[1];
+            }
         }
 
-        if (count($bits) > 2) {
-            //print "too many bits";
-            $this->action = 'ERROR';
-            return false;
-        }
-
-/*
-print "...\n";
-        print "setting paramter for raw body ".$this->raw_body;
-        var_dump($bits);
-print "...\n";
-*/
-
-        $this->parameter = $bits[0];
         return true;
     
     }
@@ -168,6 +166,7 @@ print "...\n";
         $obj->service_email = $this->service_email;
         $obj->parameter = $this->parameter;
         $obj->is_confirmation = $this->is_confirmation;
+        $obj->action = $this->action;
 
         return $obj;
 
@@ -261,7 +260,7 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
         $addr = $this->parameter;
 
         if ($addr == '') {
-            $text = 'Please tweet @addressmachine ADD address'; 
+            $text = 'Address not found'; 
         }
 
         if (!$text && !Bitcoin::checkAddress($addr)) {
@@ -277,16 +276,23 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
 
             if (!$this->is_confirmation) {
 
-                $command = $this->parameter;
-                $encodedCommand = AddressMachineEmailCommand::HashedConfirmationCommand($command, $this->user_email, $this->service_email);
+                $command = "ADD ".$this->parameter;
+                $encodedCommand = AddressMachineEmailCommand::HashedConfirmationCommand($command, $this->user_email, $this->action);
                 $encodedCommand = ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.$encodedCommand.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_SUFFIX;
 
-                $text .= "Someone, probably you, asked me to add the following address for you.\n";
+                $text .= "Someone, probably you, asked me to add the following address for you:\n";
+                $text .= "$this->parameter";
+                $text .= "\n";
                 $text .= "\n";
                 $text .= "To go ahead and add it, reply to this email with the following line intact:\n";
                 $text .= "$encodedCommand\n";
                 $text .= "\n";
                 $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
+                $text .= "\n";
+                $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
+                $text .= '{{UNSUBSCRIBE_TAG}}';
+                $text .= "\n";
+
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
                 syslog(LOG_INFO, "Created response with confirmation command $encodedCommand");
@@ -300,7 +306,25 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text = 'Sorry, something went wrong.';
             } else {
                 //$text = 'I have added the address $addr. You can delete it later with "@addressmachine DELETE '.$addr.'"';
-                $text = 'I have added the address '.$addr.' for you.';
+                $text = 'I have added the following address for you:';
+                $text .= "\n";
+                $text .= $this->parameter;
+                $text .= "\n";
+                $text .= "\n";
+                $text .= 'It will be available to people who search for your email address on or website or through an application that uses our API.';
+                $text .= "\n";
+                $text .= "\n";
+                $text .= 'You can delete it at any time by emailing it to delete@addressmachine.com then replying to the confirmation mail';
+                $text .= "\n";
+                $text .= "\n";
+                $text .= "To stop receiving emails like this in future, you can click the link below to get on our \"never email\" list:\n";
+                $text .= '{{UNSUBSCRIBE_TAG}}';
+                $text .= "\n";
+
+                $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+                $text .= "\n";
+
+
             }
             syslog(LOG_INFO, "Done trying to add address $addr");
         }
@@ -329,7 +353,7 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
     
         $id = null;
         if (!$text && !$id = AddressMachineEmailIdentity::ForIdentifier($this->user_email)) {
-            $text = 'Sorry, something went wrong.';
+            $text = 'No record for '.$this->user_email.' was registered.';
         }
 
         if (!$text && !$key = $id->userBitcoinKeyForAddress($addr)) {
@@ -338,8 +362,8 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
 
         if (!$text && !$this->is_confirmation) {
 
-            $command = $this->parameter;
-            $encodedCommand = AddressMachineEmailCommand::HashedConfirmationCommand($command, $this->user_email, $this->service_email);
+            $command = "DELETE ".$this->parameter;
+            $encodedCommand = AddressMachineEmailCommand::HashedConfirmationCommand($command, $this->user_email, $this->action);
             $encodedCommand = ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.$encodedCommand.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_SUFFIX;
 
             $text .= "Someone, probably you, asked me to delete the following address for you.\n";
@@ -348,6 +372,7 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
             $text .= "$encodedCommand\n";
             $text .= "\n";
             $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
+            $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
             syslog(LOG_INFO, "Created response with confirmation command $encodedCommand");
@@ -376,8 +401,8 @@ class AddressMachineErrorEmailAction extends AddressMachineEmailAction {
 
     public function execute() {
         
-        if ($this->screen_name) {
-            return $this->response('Sorry, I could not understand that tweet.');
+        if ($this->user_email) {
+            return $this->response('Sorry, I could not understand that email.');
         }
 
         return null;
@@ -397,23 +422,37 @@ class AddressMachineEmailMessage {
 
     public function send() {
 
-        $tweet = $this->text;
+        $address_names = array(
+            'add@addressmachine.com' => 'Address Machine (Add)',
+            'delete@addressmachine.com' => 'Address Machine (Delete)',
+            'lookup@addressmachine.com' => 'Address Machine (Lookup)',
+        );
 
-        if ($tweet == '') {
+        if (!isset($address_names[$service_email])) {
+            return null;
+        }
+
+        $name = $address_names[$service_email];
+
+        $txt = $this->text;
+
+        if ($txt == '') {
             print "error: no text, giving up";
             exit;
         }
 
-        $options = array(
-            'status' => $tweet, 
-            'trim_user' => 'true', 
-            'in_reply_to_status_id' => $this->in_reply_to_status_id
-        );
+        //print "TODO: Send email\n";
+        //var_dump($this->user_email);
+        //var_dump($txt);
+
+        $headers =  "From: {$name} <{$service_email}>" . "\r\n"; 
+        $headers .= "Reply-To: {$name} <{$service_email}>" . "\r\n"; 
+
+        mail($this->user_email, "Address Machine Request", $txt, $headers);
 
         //$twitter_req = OAuthRequest::from_consumer_and_token($consumer, $acc_token, 'POST', ADDRESSMACHINE_TWITTER_UPDATE_STATUS_URL, $options);
         //$twitter_req->sign_request($sig_method, $consumer, $acc_token);
 
-        print "TODO: Send email";
 
     }
 

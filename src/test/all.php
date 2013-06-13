@@ -50,7 +50,7 @@ class AddressMachineAddressTest extends UnitTestCase {
         // Download
         $published_path = ADDRESSMACHINE_PUBLICATION_DATA_DIRECTORY.'/data/addresses/twitter/bitcoin/user/8aaaefb7fabbVwFo2gU';
 
-        $id = AddressMachineTwitterIdentity::ForIdentifier('@edmundedgar');
+        $id = AddressMachineTwitterIdentity::ForIdentifier('@joiwejrfijslijdlsijdisjfdj');
         $addresses = $id->userBitcoinKeys();
         $this->assertTrue(is_array($addresses));
         $this->assertEqual(count($addresses), 0, 'No addresses for user at start of test');
@@ -85,7 +85,7 @@ class AddressMachineAddressTest extends UnitTestCase {
 
     function testTwitterIdentity() {
 
-        $id = AddressMachineTwitterIdentity::ForIdentifier('@edmundedgar');
+        $id = AddressMachineTwitterIdentity::ForIdentifier('@joiwejrfijslijdlsijdisjfdj');
 
         $addresses = $id->userBitcoinKeys();
 
@@ -111,7 +111,7 @@ class AddressMachineAddressTest extends UnitTestCase {
         // This test will only pass if the two are on the same machine.
         // ...otherwise we'd have to fetch it with wget.
 
-        // @edmundedgar data should end up here:
+        // @joiwejrfijslijdlsijdisjfdj data should end up here:
         $published_path = ADDRESSMACHINE_PUBLICATION_DATA_DIRECTORY.'/data/addresses/twitter/bitcoin/user/8aaaefb7fabbVwFo2gU';
         //$this->assertTrue(file_exists($published_path), 'File has been published to publishing server');
 
@@ -149,7 +149,7 @@ class AddressMachineAddressTest extends UnitTestCase {
         // This test will only pass if the two are on the same machine.
         // ...otherwise we'd have to fetch it with wget.
 
-        // @edmundedgar data should end up here:
+        // @joiwejrfijslijdlsijdisjfdj data should end up here:
         //$this->assertTrue(file_exists($published_path), 'File has been published to publishing server');
 
         $this->assertTrue($key->delete());
@@ -171,14 +171,14 @@ class AddressMachineAddressTest extends UnitTestCase {
 
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
-        $cmd->service_email = 'pants';
+        $cmd->service_email = 'pants@addressmachine.com';
         $cmd->user_email = 'test1@socialminds.jp';
         $cmd->text = 'whatever';
         $this->assertFalse($cmd->parse(), 'Parse should fail for an unknown email address');
 
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
-        $cmd->service_email = 'lookup';
+        $cmd->service_email = 'lookup@addressmachine.com';
         $cmd->user_email = 'test1@socialminds.jp';
         $cmd->text = 'test1@socialminds.jp';
         $this->assertTrue($cmd->parse(), 'Parse succeed for LOOKUP');
@@ -189,22 +189,24 @@ class AddressMachineAddressTest extends UnitTestCase {
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
         $cmd->user_email = 'test1@socialminds.jp';
-        $cmd->service_email = 'add';
+        $cmd->service_email = 'add@addressmachine.com';
         $cmd->raw_body = '12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
         $response = $cmd->execute();
         $this->assertTrue(preg_match('/'.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.'/', $response->text), 'Unconfirmed response to action needing confirmation contains a confirmation code');
 
-        $hashed = AddressMachineEmailCommand::HashedConfirmationCommand('12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z', $cmd->user_email, $cmd->service_email);
+        $hashed = AddressMachineEmailCommand::HashedConfirmationCommand('ADD 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z', $cmd->user_email, 'ADD');
+//var_dump($hashed);
         $this->assertNotEqual($hashed, '');
-        $unhashed = AddressMachineEmailCommand::UnhashedConfirmationCommand('MTJHM3ZZYk5tSldweFViTm12emRMYjdteVNHdlN2ejY4WiBiOWRlZTcyNjRkNjA3MWUxMDk4ZGYzM2IzNzgxNWU4OGE5NzZhZTNiNzJlNTk5NGM0ZGNmMjg1N2YxMTg0NWU0', $cmd->user_email, $cmd->service_email);
-        $this->assertEqual($unhashed, '12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z', 'addresses survive hashing round-trip');
+        //$unhashed = AddressMachineEmailCommand::UnhashedConfirmationCommand('MTJHM3ZZYk5tSldweFViTm12emRMYjdteVNHdlN2ejY4WiBmNzg4NTM0ODQ4NWQzYjBlMWQwODY4NDcyOGE4YWZkNmY4ODllNzlkOWVkZWRiYmEzNjVkNzliNDVjOTU3ODI2', $cmd->user_email, 'ADD');
+        $unhashed = AddressMachineEmailCommand::UnhashedConfirmationCommand($hashed, $cmd->user_email, 'ADD');
+        $this->assertEqual($unhashed, 'ADD 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z', 'addresses survive hashing round-trip');
 
         // Now take the confirmation code and do an add request
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
         $cmd->user_email = 'test1@socialminds.jp';
-        $cmd->service_email = 'add';
-        $cmd->raw_body = 'AMBEGINMTJHM3ZZYk5tSldweFViTm12emRMYjdteVNHdlN2ejY4WiBiOWRlZTcyNjRkNjA3MWUxMDk4ZGYzM2IzNzgxNWU4OGE5NzZhZTNiNzJlNTk5NGM0ZGNmMjg1N2YxMTg0NWU0AMEND';
+        $cmd->service_email = 'add@addressmachine.com';
+        $cmd->raw_body = 'AMBEGIN'.$hashed.'AMEND';
         $this->assertTrue($cmd->parse(), 'Parse succeed for ADD with confirmation');
         $this->assertTrue($cmd->is_confirmation, 'Confirmation response recognized as a confirmation');
         $response = $cmd->execute();
@@ -217,7 +219,10 @@ class AddressMachineAddressTest extends UnitTestCase {
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
         $cmd->user_email = 'test1@socialminds.jp';
-        $cmd->service_email = 'delete';
+
+        $hashed = AddressMachineEmailCommand::HashedConfirmationCommand('DELETE 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z', $cmd->user_email, 'DELETE');
+
+        $cmd->service_email = 'delete@addressmachine.com';
         $cmd->raw_body = '12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
         $response = $cmd->execute();
         $this->assertTrue(preg_match('/'.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.'/', $response->text), 'Unconfirmed response to delete action needing confirmation contains a confirmation code');
@@ -226,8 +231,8 @@ class AddressMachineAddressTest extends UnitTestCase {
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
         $cmd->user_email = 'test1@socialminds.jp';
-        $cmd->service_email = 'delete';
-        $cmd->raw_body = 'AMBEGINMTJHM3ZZYk5tSldweFViTm12emRMYjdteVNHdlN2ejY4WiBmYjY3MzczMmY0MjQwNzA5ZGE2OTk0OTQ2MTBlN2E1ZjNhOGMyODViZTNkNjcwZGM0MjRlOGFkOTA0Mzk1ZDBhAMEND';
+        $cmd->service_email = 'delete@addressmachine.com';
+        $cmd->raw_body = 'AMBEGIN'.$hashed.'AMEND';
         $this->assertTrue($cmd->parse(), 'Parse succeed for DELETE with confirmation');
         $this->assertTrue($cmd->is_confirmation, 'Confirmation response recognized as a confirmation');
         $response = $cmd->execute();
@@ -252,7 +257,7 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@edmundedgar oink oink oink';
+        $cmd->text = '@joiwejrfijslijdlsijdisjfdj oink oink oink';
         $response = $cmd->execute();
         $this->assertNull($response, 'Tweet to someone else produces null response');
 
@@ -262,56 +267,56 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine LOOKUP @edmundedgar';
+        $cmd->text = '@addressmachine LOOKUP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineEmailUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar has not registered a Bitcoin address yet. Tweet "@addressmachine @edmundedgar TEMP" to make a temporary one.', 'Lookup for non-existent address produces error message suggesting using TEMP');
-        $this->assertEqual($response->text, '@thecatboris @edmundedgar has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'Lookup for non-existent address produces error message.');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not registered a Bitcoin address yet. Tweet "@addressmachine @joiwejrfijslijdlsijdisjfdj TEMP" to make a temporary one.', 'Lookup for non-existent address produces error message suggesting using TEMP');
+        $this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'Lookup for non-existent address produces error message.');
 
         // Register an address for the user.
         $cmd = new AddressMachineEmailCommand();
-        $cmd->screen_name = 'edmundedgar';
+        $cmd->screen_name = 'joiwejrfijslijdlsijdisjfdj';
         $cmd->user_id = 13682; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
         $cmd->text = '@addressmachine ADD 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineEmailUpdate');
-        $this->assertEqual($response->text, '@edmundedgar I have added the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
+        $this->assertEqual($response->text, '@joiwejrfijslijdlsijdisjfdj I have added the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
 
-        $id = AddressMachineEmailIdentity::ForIdentifier('@edmundedgar');
+        $id = AddressMachineEmailIdentity::ForIdentifier('@joiwejrfijslijdlsijdisjfdj');
         $addresses = $id->userBitcoinKeys();
-        $this->assertEqual(count($addresses), 1, '@edmundedgar should have 1 address after registering it. Found '.count($addresses));
+        $this->assertEqual(count($addresses), 1, '@joiwejrfijslijdlsijdisjfdj should have 1 address after registering it. Found '.count($addresses));
 
         // Repeat the lookup, this time it should give us an address.
         $cmd = new AddressMachineEmailCommand();
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine LOOKUP @edmundedgar';
+        $cmd->text = '@addressmachine LOOKUP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineEmailUpdate');
-        $this->assertEqual($response->text, '@thecatboris You can pay @edmundedgar at 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
+        $this->assertEqual($response->text, '@thecatboris You can pay @joiwejrfijslijdlsijdisjfdj at 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
 
         // Delete the address.
         $cmd = new AddressMachineEmailCommand();
-        $cmd->screen_name = 'edmundedgar';
+        $cmd->screen_name = 'joiwejrfijslijdlsijdisjfdj';
         $cmd->user_id = 13682; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
         $cmd->text = '@addressmachine DELETE 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineEmailUpdate');
-        $this->assertEqual($response->text, '@edmundedgar I have deleted the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
+        $this->assertEqual($response->text, '@joiwejrfijslijdlsijdisjfdj I have deleted the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
 
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineEmailCommand();
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine LOOKUP @edmundedgar';
+        $cmd->text = '@addressmachine LOOKUP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineEmailUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar has not registered a Bitcoin address yet. Tweet "@addressmachine @edmundedgar TEMP" to make a temporary one.', 'After deletion lookup for non-existent address produces error message suggesting using TEMP');
-        $this->assertEqual($response->text, '@thecatboris @edmundedgar has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'After deletion lookup for non-existent address produces error message.');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not registered a Bitcoin address yet. Tweet "@addressmachine @joiwejrfijslijdlsijdisjfdj TEMP" to make a temporary one.', 'After deletion lookup for non-existent address produces error message suggesting using TEMP');
+        $this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'After deletion lookup for non-existent address produces error message.');
 
         /*
         // Look up a user who doesn't have an address yet.
@@ -319,10 +324,10 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine TEMP @edmundedgar';
+        $cmd->text = '@addressmachine TEMP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineEmailUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar ', 'After deletion lookup for non-existent address produces error message suggesting using TEMP (2)');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj ', 'After deletion lookup for non-existent address produces error message suggesting using TEMP (2)');
         */
 
         return;
@@ -332,7 +337,7 @@ class AddressMachineAddressTest extends UnitTestCase {
     function testTwitterCommands() {
 
         // delete any old leftovers from previous tests
-        $id = AddressMachineTwitterIdentity::ForIdentifier('@edmundedgar');
+        $id = AddressMachineTwitterIdentity::ForIdentifier('@joiwejrfijslijdlsijdisjfdj');
         $addresses = $id->userBitcoinKeys();
         if (count($addresses)) { 
             foreach($addresses as $addr) {
@@ -348,7 +353,7 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->text = '@addressmachine oink oink oink';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar has not registered a Bitcoin address yet. Tweet "@addressmachine @edmundedgar TEMP" to make a temporary one.', 'Lookup for non-existent address produces error message suggesting using TEMP');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not registered a Bitcoin address yet. Tweet "@addressmachine @joiwejrfijslijdlsijdisjfdj TEMP" to make a temporary one.', 'Lookup for non-existent address produces error message suggesting using TEMP');
         $this->assertEqual($response->text, '@thecatboris Sorry, I could not understand that tweet.', 'Rubbish message produces error message.');
 
 
@@ -357,7 +362,7 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@edmundedgar oink oink oink';
+        $cmd->text = '@joiwejrfijslijdlsijdisjfdj oink oink oink';
         $response = $cmd->execute();
         $this->assertNull($response, 'Tweet to someone else produces null response');
 
@@ -367,56 +372,56 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine LOOKUP @edmundedgar';
+        $cmd->text = '@addressmachine LOOKUP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar has not registered a Bitcoin address yet. Tweet "@addressmachine @edmundedgar TEMP" to make a temporary one.', 'Lookup for non-existent address produces error message suggesting using TEMP');
-        $this->assertEqual($response->text, '@thecatboris @edmundedgar has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'Lookup for non-existent address produces error message.');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not registered a Bitcoin address yet. Tweet "@addressmachine @joiwejrfijslijdlsijdisjfdj TEMP" to make a temporary one.', 'Lookup for non-existent address produces error message suggesting using TEMP');
+        $this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'Lookup for non-existent address produces error message.');
 
         // Register an address for the user.
         $cmd = new AddressMachineTwitterCommand();
-        $cmd->screen_name = 'edmundedgar';
+        $cmd->screen_name = 'joiwejrfijslijdlsijdisjfdj';
         $cmd->user_id = 13682; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
         $cmd->text = '@addressmachine ADD 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        $this->assertEqual($response->text, '@edmundedgar I have added the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
+        $this->assertEqual($response->text, '@joiwejrfijslijdlsijdisjfdj I have added the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
 
-        $id = AddressMachineTwitterIdentity::ForIdentifier('@edmundedgar');
+        $id = AddressMachineTwitterIdentity::ForIdentifier('@joiwejrfijslijdlsijdisjfdj');
         $addresses = $id->userBitcoinKeys();
-        $this->assertEqual(count($addresses), 1, '@edmundedgar should have 1 address after registering it. Found '.count($addresses));
+        $this->assertEqual(count($addresses), 1, '@joiwejrfijslijdlsijdisjfdj should have 1 address after registering it. Found '.count($addresses));
 
         // Repeat the lookup, this time it should give us an address.
         $cmd = new AddressMachineTwitterCommand();
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine LOOKUP @edmundedgar';
+        $cmd->text = '@addressmachine LOOKUP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        $this->assertEqual($response->text, '@thecatboris You can pay @edmundedgar at 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
+        $this->assertEqual($response->text, '@thecatboris You can pay @joiwejrfijslijdlsijdisjfdj at 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
 
         // Delete the address.
         $cmd = new AddressMachineTwitterCommand();
-        $cmd->screen_name = 'edmundedgar';
+        $cmd->screen_name = 'joiwejrfijslijdlsijdisjfdj';
         $cmd->user_id = 13682; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
         $cmd->text = '@addressmachine DELETE 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        $this->assertEqual($response->text, '@edmundedgar I have deleted the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
+        $this->assertEqual($response->text, '@joiwejrfijslijdlsijdisjfdj I have deleted the address 12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z for you.');
 
         // Look up a user who doesn't have an address yet.
         $cmd = new AddressMachineTwitterCommand();
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine LOOKUP @edmundedgar';
+        $cmd->text = '@addressmachine LOOKUP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar has not registered a Bitcoin address yet. Tweet "@addressmachine @edmundedgar TEMP" to make a temporary one.', 'After deletion lookup for non-existent address produces error message suggesting using TEMP');
-        $this->assertEqual($response->text, '@thecatboris @edmundedgar has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'After deletion lookup for non-existent address produces error message.');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not registered a Bitcoin address yet. Tweet "@addressmachine @joiwejrfijslijdlsijdisjfdj TEMP" to make a temporary one.', 'After deletion lookup for non-existent address produces error message suggesting using TEMP');
+        $this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj has not added a Bitcoin address yet. Ask them to tweet one to @addressmachine.', 'After deletion lookup for non-existent address produces error message.');
 
         /*
         // Look up a user who doesn't have an address yet.
@@ -424,10 +429,10 @@ class AddressMachineAddressTest extends UnitTestCase {
         $cmd->screen_name = 'thecatboris';
         $cmd->user_id = 562680317; // Shouldn't matter
         $cmd->id = rand(1000000,999999999999999);
-        $cmd->text = '@addressmachine TEMP @edmundedgar';
+        $cmd->text = '@addressmachine TEMP @joiwejrfijslijdlsijdisjfdj';
         $response = $cmd->execute();
         $this->assertIsA($response, 'AddressMachineTwitterUpdate');
-        //$this->assertEqual($response->text, '@thecatboris @edmundedgar ', 'After deletion lookup for non-existent address produces error message suggesting using TEMP (2)');
+        //$this->assertEqual($response->text, '@thecatboris @joiwejrfijslijdlsijdisjfdj ', 'After deletion lookup for non-existent address produces error message suggesting using TEMP (2)');
         */
 
         return;
