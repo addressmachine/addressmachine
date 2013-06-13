@@ -15,6 +15,8 @@ A Puppet manifest is provided in infrastructure/puppet to take care of some of t
 
 You will need to add a config file called config.php under src/. [TODO: Provide a sample.]
 
+External libraries are handled using submodules, so after cloning this repo you will need to do:
+  git submodule update --init
 
 
 Setting up GPG keys:
@@ -29,14 +31,14 @@ Setting up GPG keys:
     secrets/gpg/signing/production/
 
     # Create a devel key as "devel@addressmachine.com"
-    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/devel' ---gen-key
+    gpg --homedir='/path/to/addressmachine/secrets/gpg/signing/devel' ---gen-key
 
     # Create a production key as "admin@addressmachine.com"
-    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/production' ---gen-key
+    gpg --homedir='/path/to/addressmachine/secrets/gpg/signing/production' ---gen-key
 
     # Export the public keys
-    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/devel' --export --armor devel@addressmachine.com > devel.armor
-    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/production' --export --armor admin@addressmachine.com > production.armor
+    gpg --homedir='/path/to/addressmachine/secrets/gpg/signing/devel' --export --armor devel@addressmachine.com > devel.armor
+    gpg --homedir='/path/to/addressmachine/secrets/gpg/signing/production' --export --armor admin@addressmachine.com > production.armor
 
     # Create revocation certificates and store them in a safe place.
 
@@ -45,8 +47,8 @@ Setting up GPG keys:
     secrets/gpg/publication/production/
 
     Keys can be imported with:
-      gpg --homedir='/path/to/addressmachine/src/secrets/gpg/publication/devel' --import --armor devel.armor
-      gpg --homedir='/path/to/addressmachine/src/secrets/gpg/publication/production' --import --armor production.armor
+      gpg --homedir='/path/to/addressmachine/secrets/gpg/publication/devel' --import --armor devel.armor
+      gpg --homedir='/path/to/addressmachine/secrets/gpg/publication/production' --import --armor production.armor
 
 
 Permissions and writable directories:
