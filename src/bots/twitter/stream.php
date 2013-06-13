@@ -1,7 +1,4 @@
 <?php
-
-define('ADDRESSMACHINE_IS_DEVEL_ENVIRONMENT', 1);
-
 require_once(dirname(__FILE__).'/../../config.php');
 
 require_once(ADDRESSMACHINE_LIB_ROOT_EXTERNAL.'/phirehose/lib/Phirehose.php');
