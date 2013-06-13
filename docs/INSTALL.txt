@@ -1,0 +1,62 @@
+Installation instructions for Address Machine
+Edmund Edgar, 2013-06-13
+
+Address Machine runs in three parts. Each of these can be run on a different server.
+
+A) Bot Box: Background tasks check email and Twitter, confirm addresses, sign them, store them locally and publish them to:
+B) API Server / Data Store: Host data for looking up via the API, including for AJAX requests from:
+C) Website: A static website for www.addressmachine.com.
+
+In theory all the above could run on the same server, but for security reasons it is recommended that they be separated in production environments, or at a minimum that the Bot Box be separated from internet-facing web servers.
+
+It should also be possible to populate the Data Store from the Bot Box by rsync.
+
+
+Setting up GPG keys:
+
+ A) Bot Box needs to hold private keys able to sign addresses it confirms.
+
+  Keys for signing are kept under:   
+   secrets/gpg/signing/
+
+  Separate keys are kept for production and development:
+    secrets/gpg/signing/devel/
+    secrets/gpg/signing/production/
+
+    # Create a devel key as "devel@addressmachine.com"
+    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/devel' ---gen-key
+
+    # Create a production key as "admin@addressmachine.com"
+    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/production' ---gen-key
+
+    # Export the public keys
+    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/devel' --export --armor devel@addressmachine.com > devel.armor
+    gpg --homedir='/path/to/addressmachine/src/secrets/gpg/signing/production' --export --armor admin@addressmachine.com > production.armor
+
+    # Create revocation certificates and store them in a safe place.
+
+ B) API Server / Data Store may need the ability to check whether addresses it receives are properly signed. To do this it will need public keys imported into:
+    secrets/gpg/publication/devel/
+    secrets/gpg/publication/production/
+
+    Keys can be imported with:
+      gpg --homedir='/path/to/addressmachine/src/secrets/gpg/publication/devel' --import --armor devel.armor
+      gpg --homedir='/path/to/addressmachine/src/secrets/gpg/publication/production' --import --armor production.armor
+
+
+Permissions and writable directories:
+
+ A) Bot Box: 
+    Bot box expects to be able to keep a store of addresses under /path/to/addressmachine/data/addresses/
+
+ B) API Server / Data Store:
+
+    /webroot should be configured as the document root by the web server.
+
+    /api should be allowed to run PHP scripts.
+    /api/private may be restricted by IP address etc so that only the Bot Box can reach it.
+
+    /addresses should be directly under the webroot, writable by the web server user that runs the PHP scripts under /api/private.
+
+ C) Website should just serve static HTML. Nothing needs to be writable by the web server user, and no script execution needs to be allowed.
+
