@@ -11,6 +11,8 @@ In theory all the above could run on the same server, but for security reasons i
 
 It should also be possible to populate the Data Store from the Bot Box by rsync.
 
+A Puppet manifest is provided in infrastructure/puppet to take care of some of the installation donkey-work, but you'll still need to perform the following manual steps.
+
 
 Setting up GPG keys:
 
@@ -70,12 +72,12 @@ Email
 
  The Bot Box needs to be able to send email. We do this through SendGrid.
 
-#SENDGRID ON START
-smtp_sasl_auth_enable = yes
-smtp_sasl_password_maps = static:beech_postfix:PASSWORD_GOES_HERE
-smtp_sasl_security_options = noanonymous
-smtp_tls_security_level = encrypt
-header_size_limit = 4096000
-relayhost = [smtp.sendgrid.net]:587
-#SENDGRID ON END
+  #SENDGRID ON START
+  smtp_sasl_auth_enable = yes
+  smtp_sasl_password_maps = static:beech_postfix:PASSWORD_GOES_HERE
+  smtp_sasl_security_options = noanonymous
+  smtp_tls_security_level = encrypt
+  header_size_limit = 4096000
+  relayhost = [smtp.sendgrid.net]:587
+  #SENDGRID ON END
 
