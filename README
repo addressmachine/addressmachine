@@ -10,11 +10,11 @@ You should have received a copy of the GNU Affero General Public License. If not
 Note that extra conditions apply to the design used for the website. See resources/design/license.txt for details.
 
 Goals:
- - Make it as easy as practical for many different services to prompt people to send money to other people by their email addresses or Twitter handles.
- - Reduce the need for services to hold money on behalf of their users by allowing them to send the money directly.
+ - Make it as easy as practical for many different services to prompt people to send Bitcoins to other people by their email addresses or Twitter handles.
+ - Reduce the need for services to hold Bitcoins on behalf of their users by allowing them to send the Bitcoins directly.
  - Give people using our service to run their own service a reasonable expectation that in the event that our service goes away, they'll be able to continue operating their service using another provider.
  - Provide users with as much privacy as is practical given the other goals.
- - Hold as little money ourselves as is practical given the other goals.
+ - Hold as few Bitcoins ourselves as is practical given the other goals.
 
 Functions (Those marked with "x" have not been implemented yet):
  o Web action to get an address for an identifier (email / twitter handle), or say if there isn't one.
@@ -27,13 +27,13 @@ Functions (Those marked with "x" have not been implemented yet):
  o Register an address from twitter
  o Unregister an address from twitter
  x Opt out from twitter [TODO]
- x Collect money for email [TODO]
- x Collect money for twitter [TODO]
+ x Collect Bitcoins for email [TODO]
+ x Collect Bitcoins for twitter [TODO]
 
 Fees:
  - We don't mind running this service at a modest loss, which is what we expect short-term. We may charge for additional services in future, and we'll charge fees where we want to discourage or limit behaviour.
  - If you want to make a lot of queries you may want to pay us a fee to help prove you're not spamming us. Initially we will set this up manually.
- - [TODO] If we create an address for you and money is sent to it but it is not collected within 30 days, we will delete the wallet and donate the money to a good cause, which by default will be ourselves. As well as helping fund the service or some other good cause, this should encourage people not to use us like a bank, and reduce the amount of data we keep on people who didn't sign up for our service.
+ - [TODO] If we create an address for you and Bitcoins are sent to it but it is not collected within 30 days, we will delete the wallet and donate the Bitcoins to a good cause, which by default will be ourselves. As well as helping fund the service or some other good cause, this should encourage people not to use us like a bank, and reduce the amount of data we keep on people who didn't sign up for our service.
 
 Sharing and interoperability:
  - All code will be open source. (We may make an exception for some code related to spam-prevention, but it will be possible to run the service without it.)
@@ -58,8 +58,8 @@ Likely future features:
 
 Existing services with some similar functionality
  - thewalletlist.org manages Bitcoin addresses for email addresses using a login account.
- - coinapult.com looks after money for people, as we do when we don't have email addresses for them yet.
- - bitcointipper.com lets you send money to people on Twitter.
+ - coinapult.com looks after Bitcoins for people, as we do when we don't have email addresses for them yet.
+ - bitcointipper.com lets you send Bitcoins to people on Twitter.
 
 API calls:
   - TODO: List the web API commands.
