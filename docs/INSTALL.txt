@@ -13,6 +13,9 @@ It should also be possible to populate the Data Store from the Bot Box by rsync.
 
 A Puppet manifest is provided in infrastructure/puppet to take care of some of the installation donkey-work, but you'll still need to perform the following manual steps.
 
+You will need to add a config file called config.php under src/. [TODO: Provide a sample.]
+
+
 
 Setting up GPG keys:
 
@@ -80,4 +83,16 @@ Email
   header_size_limit = 4096000
   relayhost = [smtp.sendgrid.net]:587
   #SENDGRID ON END
+
+
+Background tasks
+
+ The Bot Box needs the following tasks to be running:
+  (TODO: Make monit config for this and add it to puppet)
+
+  cd /path/to/addressmachine/src/bots/twitter/
+  php stream.php
+
+  cd /path/to/addressmachine/src/bots/email/
+  php readmail.php -d
 
