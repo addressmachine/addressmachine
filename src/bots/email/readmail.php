@@ -1,15 +1,4 @@
 <?php
-/**
-* Freemail v1.1 with SL patch
-*
-* @package freemail
-* @copyright Copyright (c) 2008 Serafim Panov
-* @license http://www.gnu.org/licenses/gpl-3.0.html GNU GPL v3
-* @author Serafim Panov
-* @contributor: Paul G. Preibisch - aka Fire centaur in Second Life
-* @contributor: Edmund Edgar
-*
-*/
 
 if (isset($argv)) {
     define('CLI_SCRIPT', true);
