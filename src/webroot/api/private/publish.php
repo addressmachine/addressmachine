@@ -11,9 +11,12 @@ require_once(ADDRESSMACHINE_LIB_ROOT.'/address/address.inc.php');
 
 $json = file_get_contents('php://input');
 $input = json_decode( $json ); 
+//var_dump($input);
 
 $key = AddressMachinePaymentKey::ForStdClass($input->payload); 
+$path = $key->path($publisher = true);
 $filename = $key->filename($publisher = true);
+//print "filname is :$filename:";
 /*
 if (!$key->isSignatureValid()) {
     print "NG";
@@ -21,7 +24,8 @@ if (!$key->isSignatureValid()) {
 }
 */
 
-if (!$key->write_file($filename, $json)) {
+if (!$key->write_file($path, $filename, $json)) {
+    //print "write file failed";
     //syslog(LOG_WARNING, "----end publish create failed---");
     exit;
 }
