@@ -1,2 +1,4 @@
-The puppet manifest here can be called directly with 
-sudo puppet site.pp
+The puppet manifest here can be called directly with:
+sudo puppet apply site.pp
+
+You'll need to update site.pp with the hostnames of your actual boxes.

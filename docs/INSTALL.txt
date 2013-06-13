@@ -65,3 +65,17 @@ Logging
  
  The Bot Box and the API Server / Data Store will log to syslog. On Ubuntu this goes to /var/log/syslog, but you can configure syslog to send it somewhere else.
 
+
+Email
+
+ The Bot Box needs to be able to send email. We do this through SendGrid.
+
+#SENDGRID ON START
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = static:beech_postfix:PASSWORD_GOES_HERE
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = encrypt
+header_size_limit = 4096000
+relayhost = [smtp.sendgrid.net]:587
+#SENDGRID ON END
+
