@@ -60,6 +60,9 @@ class bot_box {
     # See INSTALL.txt for the specific lines to add.
     package { "postfix": ensure => installed } 
 
+    # This may be useful to check mail can be sent from the box
+    package { "mailutils": ensure => installed } 
+
 }
 
 class static_website {
