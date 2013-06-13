@@ -10,6 +10,7 @@ require_once(ADDRESSMACHINE_LIB_ROOT_EXTERNAL.'/bitcoin-php/src/bitcoin.inc');
 
 require_once(ADDRESSMACHINE_LIB_ROOT.'/twitter/twitter.inc.php');
 require_once(ADDRESSMACHINE_LIB_ROOT.'/address/address.inc.php');
+require_once(ADDRESSMACHINE_LIB_ROOT.'/publisher/client.inc.php');
 
 /**
  * Barebones example of using UserstreamPhirehose.
