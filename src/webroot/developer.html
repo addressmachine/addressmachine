@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]>    <html class="ie7 oldie"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie8 oldie"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html> <!--<![endif]-->
+
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Address Machine</title>
+
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+
+
+</head>
+
+<body>
+
+
+<!-- header-wrap -->
+<div id="header-wrap">
+    <header>
+
+        <hgroup>
+            <h1><a href="index.html"><img src="/images/logo.png" alt="Address Machine Logo"><span class="htext">Address Machine</span></a></h1>
+            <h3>Share your address so people can send you Bitcoins.</h3>
+        </hgroup>
+
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/developer.html">Developers</a></li>
+                <li><a href="/privacy.html">Privacy</a></li>
+                <li><a href="mailto:humans@addressmachine.com">Contact Us</a></li>
+            </ul>
+        </nav>
+
+    </header>
+</div>
+
+<!-- content-wrap -->
+<div class="content-wrap">
+
+    <!-- main -->
+    <section id="main">
+
+<h2>Our API</h2>
+
+<p>
+We provide simple JSON access to Bitcoin address data.
+</p>
+
+<p>
+We recommend that you send us SHA1 hashes of the email addresses and Twitter names you use. This will avoid the need to share more of your users' personal data with us than is necessary, and makes sharing data with us effectively &quot;opt-in&quot; for your users.
+</p>
+
+<p>
+The following will produce a JSON array of addresses, or a 404 if the user is not registered.
+</p>
+
+<p>
+<b><pre>
+https://lookup.addressmachine.com/addresses/&lt;service&gt;/bitcoin/user/&lt;sha1&gt;/
+</pre></b>
+<ul>
+<li><b>&lt;service&gt;</b> is either <i>email</i> or <i>twitter</i>.</li>
+<li><b>&lt;sha1&gt;</b> is an SHA1 hash of the username or Twitter handle</i>.</li>
+</ul>
+</p>
+
+<p>
+Once you've fetched a JSON array of addresses, you can retrieve an object containing the full details about each one as follows:
+</p>
+
+<p>
+<b><pre>
+https://lookup.addressmachine.com/addresses/&lt;service&gt;/bitcoin/user/&lt;sha1&gt;/&lt;address&gt;
+</pre></b>
+<ul>
+<li><b>&lt;service&gt;</b> is either <i>email</i> or <i>twitter</i>.</li>
+<li><b>&lt;sha1&gt;</b> is an SHA1 hash of the username or Twitter handle</i>.</li>
+<li><b>&lt;address&gt;</b> is a Bitcoin address.</li>
+</ul>
+</p>
+
+<p>
+A 404 code will be returned if the full resource cannot be found, which should usually only happen if the user has deleted the data since you fetched the list of addresses.
+</p>
+
+<p>
+We recommend that having fetched the data, you verify GPG signature to make sure we signed it.
+</p>
+
+<p>
+Code samples coming soon. Don't hestitate to contact us if you need some help in the meantime.
+</p>
+
+
+<!-- footer -->
+<footer>
+    <div class="footer-content">
+    <br />
+    <!--
+        <ul class="footer-menu">
+            <li><a href="#main">Home</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#about-us">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        -->
+
+        <p class="footer-text">Copyright 2013 Social Minds Incorporated. &nbsp;&nbsp;&nbsp; Website design based on OnePage by <a href="http://www.styleshout.com/">Styleshout</a></p>
+    </div>
+
+</footer>
+
+<script type="text/javascript" src="js/sha1.js"></script>
+<script type="text/javascript" src="js/lookup.js"></script>
+</body>
+</html>

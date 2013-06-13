@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]>    <html class="ie7 oldie"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie8 oldie"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html> <!--<![endif]-->
+
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Address Machine</title>
+
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+
+
+</head>
+
+<body>
+
+
+<!-- header-wrap -->
+<div id="header-wrap">
+    <header>
+
+        <hgroup>
+            <h1><a href="index.html"><img src="/images/logo.png" alt="Address Machine Logo"><span class="htext">Address Machine</span></a></h1>
+            <h3>Share your address so people can send you Bitcoins.</h3>
+        </hgroup>
+
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/developer.html">Developers</a></li>
+                <li><a href="/privacy.html">Privacy</a></li>
+                <li><a href="mailto:humans@addressmachine.com">Contact Us</a></li>
+            </ul>
+        </nav>
+
+    </header>
+</div>
+
+<!-- content-wrap -->
+<div class="content-wrap">
+
+    <!-- main -->
+    <section id="main">
+
+        <div class="intro-box">
+
+           <h2>Add your address</h2>
+
+           <p class="intro">
+                Address machine helps people pay you using <a href="http://www.bitcoin.org">Bitcoin</a>, the fast-growing peer-to-peer digital currency.
+           </p>
+
+           <p class="intro">
+                You can register a Bitcoin address for your Twitter account or your email address.
+            </p>
+
+           <p class="intro">
+                To register a Bitcoin address for your Twitter account, tweet it to <a href="http://www.twitter.com/addressmachine"><b>@addressmachine</b></a>.
+            </p>
+
+           <p class="intro">
+                To register a Bitcoin address for your email address, email it to <a href="mailto:add@addressmachine.com"><b>add@addressmachine.com</b></a>, then reply to the confirmation email we will send you.
+           </p>
+
+           <p class="intro">
+                You can delete your addresses at any time.
+                <!--
+                You can delete your addresses at any time by <a href="http://twitter.com/home?status=@addressmachine%20delete%20PUT_YOUR_ADDRESS_HERE">tweeting "delete" to @addressmachine</a> or by emailing <a href="mailto:delete@addressmachine.com">delete@addressmachine.com</a>.
+                -->
+           </p>
+
+        </div>
+
+        <form id="lookupform">
+        <div>
+            <h3>Find an address</h3>
+            <br />
+            <label>Email address or Twitter name</label>
+            <input name="lookup" type="text" id="lookup" value="" />
+            <input type="submit" value="Look up" class="button">
+            <div id="lookup_results" style="display:none">
+                <div id="lookup_result_term"></div>
+                <div id="lookup_result_address"></div>
+                <div id="lookup_result_show_hide"><a id="lookup_result_gpg_link" href="#">GPG data</a></div>
+                <div id="lookup_result_signed_data" style="display:none"><textarea id="lookup_result_signed_data_textarea"></textarea></div>
+            </div>
+        </div>
+
+        <p>
+        <br />
+        You can also look up addresses of Twitter users by tweeting their names to <a href="http://www.twitter.com/addressmachine">@addressmachine</a>.
+        </p>
+
+        </form>
+
+        <div class="row no-bottom-margin">
+
+            <section class="col">
+                <h2>API</h2>
+                    
+                <p>
+                    Addresses are made available through a simple API.
+                </p>
+
+                <p>
+                    Anyone can look up addresses free of charge. 
+                </p>
+
+                <p>
+                    See our <a href="/developer.html">developer</a> section for more information.
+                </p>
+
+
+            </section>
+
+
+            <section class="col mid">
+
+                <h2>Security</h2>
+
+                <p>
+                    Addresses are individually signed with our GPG keys so that people can verify them without needing to trust the website that is publishing them.
+                </p>
+
+                <p>
+                    Private keys used to sign addresses are not stored on our web-facing systems. 
+                </p>
+
+                <p>
+                No Bitcoins are stored on this server.
+                </p>
+               
+            </section>
+            <section class="col">
+                <h2>Sharing</h2>
+
+                <p>
+                    The source code for Address Machine is <a href="https://github.com/addressmachine/addressmachine">available on GitHub</a>.
+                </p>
+
+                <p>
+                    Contact us if you are interested in maintaining a mirror of our database.
+                </p>
+
+                <p>
+                    Our systems are also designed to be able to publish addresses confirmed and signed by other people. 
+                </p>
+            </section>
+        </div>
+
+        <a class="back-to-top" href="#main">Back to Top</a>
+
+      </section>
+
+</div>
+
+<!-- footer -->
+<footer>
+    <div class="footer-content">
+    <br />
+    <!--
+        <ul class="footer-menu">
+            <li><a href="#main">Home</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#about-us">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        -->
+
+        <p class="footer-text">Copyright 2013 Social Minds Incorporated. &nbsp;&nbsp;&nbsp; Website design based on OnePage by <a href="http://www.styleshout.com/">Styleshout</a></p>
+    </div>
+
+</footer>
+
+<script type="text/javascript" src="js/sha1.js"></script>
+<script type="text/javascript" src="js/lookup.js"></script>
+</body>
+</html>
