@@ -54,6 +54,9 @@ class bot_box {
     # To send signed addresses to the publishing server.
     package { "php5-curl": ensure => installed } 
 
+    # To connect to the imap server and fetch email
+    package { "php5-imap": ensure => installed } 
+
     # To handle email. 
     # Note that you'll also need to put the SendGrid authentication details in here.
     # We'll do that manually after the package has been installed.
