@@ -423,12 +423,37 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
         }
 
         if ( !$text && !$key->delete() ) {
-            $text = 'Sorry, something went wrong, I could not delete the address'.$addr;
+
+            syslog(LOG_WARNING, "Deletion failed for command $encodedCommand");
+
+            $text = 'I got a request to delete the address '.$addr;
+            $text .= "\n";
+            $text .= "Unfortunately something went wrong and I was unable to do it.\n";
+            $text .= "\n";
+            $text .= "The problem has been logged and we'll be looking into what happened.\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
+            $text .= '{{UNSUBSCRIBE_TAG}}';
+            $text .= "\n";
+            $text .= "\n";
+            $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+
         }
 
         if (!$text) {
             //$text = 'I have added the address $addr. You can delete it later with "@addressmachine DELETE '.$addr.'"';
             $text = 'I have deleted the address '.$addr.' for you.';
+            $text .= "\n";
+            $text .= "The address will no longer be published on our website, but you may still receive payments from people who have already looked it up.\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
+            $text .= '{{UNSUBSCRIBE_TAG}}';
+            $text .= "\n";
+            $text .= "\n";
+            $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+
         }
 
         return $this->response($text);
