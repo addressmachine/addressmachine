@@ -281,7 +281,7 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
                 $text .= '{{UNSUBSCRIBE_TAG}}';
                 $text .= "\n";
-
+                $text .= "\n";
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
         }
 
@@ -295,14 +295,14 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
             $text .= "\n";
             $text .= "It looks like this address is already in our database, so we're going to do nothing.\n";
             $text .= "\n";
-            $text .= "If you want to remove the address, please email it to delete@addressmachine.com then replying to the confirmation mail.\n";
+            $text .= "If you want to remove the address, please email it to delete@addressmachine.com then reply to the confirmation mail.\n";
             $text .= "\n";
             $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
             $text .= "\n";
             $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
             $text .= '{{UNSUBSCRIBE_TAG}}';
             $text .= "\n";
-
+            $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
         }
@@ -327,7 +327,7 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
                 $text .= '{{UNSUBSCRIBE_TAG}}';
                 $text .= "\n";
-
+                $text .= "\n";
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
                 syslog(LOG_INFO, "Created response with confirmation command $encodedCommand");
@@ -351,12 +351,10 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= "\n";
                 $text .= 'You can delete it at any time by emailing it to delete@addressmachine.com then replying to the confirmation mail.';
                 $text .= "\n";
-                $text .= "\n";
                 $text .= "To stop receiving emails like this in future, you can click the link below to get on our \"never email\" list:\n";
                 $text .= '{{UNSUBSCRIBE_TAG}}';
                 $text .= "\n";
                 $text .= "\n";
-
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
                 $text .= "\n";
 
@@ -410,6 +408,11 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
             $text .= "$encodedCommand\n";
             $text .= "\n";
             $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
+            $text .= '{{UNSUBSCRIBE_TAG}}';
+            $text .= "\n";
             $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
