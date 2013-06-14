@@ -90,7 +90,7 @@ function display_address(service, id, term, addr) {
     console.log("need to validate address "+addr+" for id "+id);
 
     var r = new XMLHttpRequest();
-    r.open('GET', "/addresses/"+service+"/bitcoin/user/"+id+"/"+addr, true);
+    r.open('GET', "http://lookup.addressmachine.com/addresses/"+service+"/bitcoin/user/"+id+"/"+addr, true);
     r.onreadystatechange = function () {
 
         if (r.readyState != 4) {
