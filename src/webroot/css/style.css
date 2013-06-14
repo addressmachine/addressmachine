@@ -339,7 +339,7 @@ header hgroup h1 a {
     height: 31px;
     width: 350px;
     color: white;
-    font-size: 24px;
+    font-size: 20px;
     letter-spacing: -0.9px;
     line-height: 50px;
 }
@@ -354,7 +354,7 @@ header hgroup h3  {
     height: 0;
     position: absolute;
     left:74px;
-    top:26px;
+    top:25px;
     font-size:12px;
     text-shadow: none;
     color: #c5c4c4;
