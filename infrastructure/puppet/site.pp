@@ -1,4 +1,4 @@
-node your_dev_box {
+node beech {
 
     # We can develop with everything on one box.
 
@@ -9,19 +9,19 @@ node your_dev_box {
 
 }
 
-node your_bot_host {
+node lovage {
 
     include bot_box
 
 }
 
-node your_publisher_host {
+node r7 {
 
     include publisher_website
 
 }
 
-node your_static_website_host {
+node r8 {
 
     include static_website
 
