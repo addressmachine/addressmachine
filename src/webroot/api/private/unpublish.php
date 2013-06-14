@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__).'/../../../config.php');
+require_once(dirname(__FILE__).'/../../../config.publication.php');
 
 // Print not-authorized headers and exit unless auth details ok
 // You may want to remove this and set the check it at the web server level instead.
