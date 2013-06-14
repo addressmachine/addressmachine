@@ -269,7 +269,42 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
     
         $id = null;
         if (!$text && !$id = AddressMachineEmailIdentity::ForIdentifier($this->user_email)) {
-            $text = 'Sorry, something went wrong.';
+
+                $text .= "Someone, probably you, asked me to add the following address for you:\n";
+                $text .= "$this->parameter";
+                $text .= "\n";
+                $text .= "\n";
+                $text .= "Unfortunately something went wrong and we weren't able to do it.";
+                $text .= "\n";
+                $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
+                $text .= "\n";
+                $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
+                $text .= '{{UNSUBSCRIBE_TAG}}';
+                $text .= "\n";
+
+                $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+        }
+
+        // TODO: We should probably keep a record of this and only send you one of these emails
+        // ...in case we end up with some kind of auto-responder loop or something.
+        if (!$text && $id->userBitcoinKeyForAddress($this->parameter)) {
+            
+            $text .= "Someone, probably you, asked me to add the following address for you:\n";
+            $text .= "$this->parameter";
+            $text .= "\n";
+            $text .= "\n";
+            $text .= "It looks like this address is already in our database, so we're going to do nothing.\n";
+            $text .= "\n";
+            $text .= "If you want to remove the address, please email it to delete@addressmachine.com then replying to the confirmation mail.\n";
+            $text .= "\n";
+            $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
+            $text .= "\n";
+            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
+            $text .= '{{UNSUBSCRIBE_TAG}}';
+            $text .= "\n";
+
+            $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+
         }
 
         if (!$text) {
@@ -327,7 +362,9 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
 
 
             }
+
             syslog(LOG_INFO, "Done trying to add address $addr");
+
         }
 
         return $this->response($text);
