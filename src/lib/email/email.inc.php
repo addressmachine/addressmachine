@@ -314,11 +314,12 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= 'It will be available to people who search for your email address on or website or through an application that uses our API.';
                 $text .= "\n";
                 $text .= "\n";
-                $text .= 'You can delete it at any time by emailing it to delete@addressmachine.com then replying to the confirmation mail';
+                $text .= 'You can delete it at any time by emailing it to delete@addressmachine.com then replying to the confirmation mail.';
                 $text .= "\n";
                 $text .= "\n";
                 $text .= "To stop receiving emails like this in future, you can click the link below to get on our \"never email\" list:\n";
                 $text .= '{{UNSUBSCRIBE_TAG}}';
+                $text .= "\n";
                 $text .= "\n";
 
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
@@ -421,6 +422,8 @@ class AddressMachineEmailMessage {
     var $user_email;
 
     public function send() {
+
+        $service_email = $this->service_email;
 
         $address_names = array(
             'add@addressmachine.com' => 'Address Machine (Add)',
