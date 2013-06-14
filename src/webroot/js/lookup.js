@@ -32,7 +32,12 @@ document.getElementById('lookupform').onsubmit = function() {
             display_no_address(service, q);
             return false;
         } else if (r.status != 200) {
-            alert('wonky status:'+r.status);
+            // Currently the apache server at lookup.addressmachine.com isn't setting CORS headers for 404s.
+            // This means that a response that should come back with a 404 status appear to JavaScript to have a status of 0.
+            // For now, we'll treat zero status as if it's a 404, ie as if the search was fine, but showed a negative result.
+            // Later, we'll fix this by either persuading apache to send us CORS headers even on 404s or by making it send us an empty list instead.
+            display_no_address(service, q);
+            //alert('wonky status:'+r.status);
             return false;
         }
 
