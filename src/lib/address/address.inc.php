@@ -395,7 +395,7 @@ class AddressMachinePaymentKey {
             return false;
         }
 
-        if (!AddressMachinePublisherClient::Publish($contents, $file)) {
+        if (!AddressMachinePublisherClient::Publish($contents)) {
             syslog(LOG_WARNING, "Publishing $file failed");
         }
 
@@ -420,7 +420,7 @@ class AddressMachinePaymentKey {
         $contents = file_get_contents($file);
 
         // TODO: Would be better to give the user some warning that the unpublishing may take some time...
-        if (!AddressMachinePublisherClient::UnPublish($contents, $file)) {
+        if (!AddressMachinePublisherClient::UnPublish($contents)) {
             syslog(LOG_WARNING, "Unpublishing $file failed, will continue with local delete and hope it gets dealt with later in an rsync job");
         }
 
