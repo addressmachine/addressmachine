@@ -58,7 +58,7 @@ class MyUserConsumer extends UserstreamPhirehose
         return $this->handleError('I ('.ADDRESSMACHINE_SCREEN_NAME.') am not mentioned first - '.$first_mention['screen_name']. " is."); 
     }
     if ($first_mention['indices'][0] != 0) {
-        $this->handleError('I am not mentioned first');      
+        return $this->handleError('I am not mentioned first');      
     }
 
     $cmd = new AddressMachineTwitterCommand();
