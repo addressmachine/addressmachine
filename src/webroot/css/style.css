@@ -405,7 +405,7 @@ section#main h1 {
 }
 section#main .intro-box {
     float:left;
-    width:460px;
+    width:490px;
     min-height: 300px;
 }
 section#main .row .col h2 {
@@ -617,6 +617,46 @@ section#about-us aside .download-btn {
     -webkit-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
 }
 
+form#addform {
+     margin: 10px 0 25px 0;
+    padding: 30px 40px 30px 40px;
+    margin-bottom:30px;
+    border:2px solid gray;
+}
+form#addform input {
+    margin-bottom: 20px;
+	padding: 9px 0px;
+    color: #6A6969;
+    background: #cbcbcb;
+	border-width: 1px;
+	border-style: solid;
+  	border-color: #b8b8b8 #EBEBEB #EBEBEB #b8b8b8;
+	font: 15px Helvetica, Arial, Sans-serif;
+
+    -moz-box-shadow:inset 0 3px 1px rgba(0, 0, 0, .1);
+    -webkit-box-shadow:inset 0 1px 3px rgba(0, 0, 0, .1);
+    box-shadow:inset 0 1px 3px rgba(0, 0, 0, .1);
+}
+form#addform input.button {
+   	padding: 8px;
+   	height: 38px;
+	background: #1F8532 url(../images/btn-bg.png);
+    border: 1px solid #066a19;
+    font-family: "MerriweatherBold", Georgia, Serif;
+    font-size: 14px;
+    color: #ffffff;
+    cursor: pointer;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+
+    box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
+    -moz-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
+    -webkit-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
+}
+
+form#addform input:focus {
+	background: #F0F0F0;
+}
+
 /* ---------------------------------------------------
     Lookup
 ----------------------------------------------------- */
@@ -679,6 +719,7 @@ form#lookupform input.button {
     color: #ffffff;
     cursor: pointer;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+    float:right;
 
     box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
     -moz-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;

@@ -1,3 +1,44 @@
+var addresses = new Array();
+
+document.body.onload = function() {
+    var val = document.getElementById('bitcoin').value;
+    if (val == '') {
+        val = '[address]';
+    }
+    document.getElementById('tweetlink').innerHTML = '<a href="https://twitter.com/intent/tweet?text=@addressmachine%20'+val+'">@addressmachine '+val+'</a>';
+}
+
+document.getElementById('bitcoin').onchange = function() {
+    var val = document.getElementById('bitcoin').value;
+    if (val == '') {
+        val = '[address]';
+    }
+    document.getElementById('tweetlink').innerHTML = '<a href="https://twitter.com/intent/tweet?text=@addressmachine%20'+val+'">@addressmachine '+val+'</a>';
+}
+
+document.getElementById('bitcoin').onkeyup = function() {
+    var val = document.getElementById('bitcoin').value;
+    if (val == '') {
+        val = '[address]';
+    }
+    document.getElementById('tweetlink').innerHTML = '<a href="https://twitter.com/intent/tweet?text=@addressmachine%20'+val+'">@addressmachine '+val+'</a>';
+}
+
+document.getElementById('addform').onsubmit= function() {
+    var bitcoin = document.getElementById('bitcoin').value;
+    if (bitcoin== '') {
+        document.getElementById('bitcoin').focus();
+        return false;
+    }
+    var email = document.getElementById('email').value;
+    if (email == '') {
+        document.getElementById('email').focus();
+        return false;
+    }
+
+    return false;
+}
+
 document.getElementById('lookupform').onsubmit = function() {
 
     var q = document.getElementById('lookup').value;
@@ -45,12 +86,11 @@ document.getElementById('lookupform').onsubmit = function() {
 
         console.log(r.responseText);
         var data = JSON.parse(r.responseText);
-        for (var i=0; i<data.length; i++) {
-            var item = data[i];
-            if (typeof item == 'string') {
-                display_address(service, hash, q, item);
-            }
+        if (data.length == 0) {
+            display_no_address(service, q);
         }
+        display_addresses(service, hash, q, data);
+        
 
         return false;
     };
@@ -79,7 +119,9 @@ function display_no_address(service, term) {
 
 }
 
-function display_address(service, id, term, addr) {
+function display_addresses(service, id, term, addresses) {
+
+    addr = addresses[0];
 
     if (id == '') {
         return false;

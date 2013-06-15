@@ -53,31 +53,32 @@
     <!-- main -->
     <section id="main" style="padding-top:10px;">
 
-        <div class="intro-box">
-
-           <h2>Add your address</h2>
+        <div class="intro-box" >
 
            <p class="intro">
-                Address machine helps people pay you using <a href="http://www.bitcoin.org">Bitcoin</a>, the fast-growing peer-to-peer digital currency.
+           <br />
+                Address machine is a public database that helps people pay you using <a href="http://www.bitcoin.org">Bitcoin</a>, the fast-growing peer-to-peer digital currency.
+           </p>
+
+            <p class="intro">
+           <form id="addform" method="POST">
+           <h4>Enter your Bitcoin address:</h4> 
+            <input name="bitcoin" id="bitcoin" style="width:100%">
+            <br />
+            <h4>Link it to your email address:</h4> 
+            <input name="email" id="email" style="width:300px">
+            <input type="submit" class="button" value="Link" style="float:right; width:80px;">
+            <br />
+            <h5>Or link it with Twitter by tweeting:</h5>
+            <h4 id="tweetlink"><a href="https://twitter.com/intent/tweet?text=@addressmachine%20PUT_YOUR_ADDRESS_HERE">@addressmachine [address]</a></h4>
+           </form>
            </p>
 
            <p class="intro">
-                You can register a Bitcoin address for your Twitter account or your email address.
-            </p>
-
-           <p class="intro">
-                To register a Bitcoin address for your Twitter account, tweet it to <a href="http://www.twitter.com/addressmachine">@addressmachine</a>.
-            </p>
-
-           <p class="intro">
-                To register a Bitcoin address for your email address, email it to <a href="mailto:add@addressmachine.com">add@addressmachine.com</a>, then reply to the confirmation email we will send you.
+           You can delete your addresses at any time by emailing it to <a href="mailto:delete@addressmachine.com">delete@addressmachine.com</a>.
            </p>
-
            <p class="intro">
-                You can delete your addresses at any time.
-                <!--
-                You can delete your addresses at any time by <a href="http://twitter.com/home?status=@addressmachine%20delete%20PUT_YOUR_ADDRESS_HERE">tweeting "delete" to @addressmachine</a> or by emailing <a href="mailto:delete@addressmachine.com">delete@addressmachine.com</a>.
-                -->
+           You can delete Twitter addresses by tweeting <a href="http://twitter.com/home?status=@addressmachine%20delete%20PUT_YOUR_ADDRESS_HERE">@addressmachine DELETE [address]</a>. 
            </p>
 
         </div>
@@ -89,7 +90,8 @@
             <label>Email address or Twitter name</label>
             <input name="lookup" type="text" id="lookup" value="" />
             <input type="submit" value="Look up" class="button">
-            <div id="lookup_results" style="display:none">
+            <div style="clear:both"></div>
+            <div id="lookup_results" style="display:none; margin-bottom:15px">
                 <div id="lookup_result_term"></div>
                 <div id="lookup_result_address"></div>
                 <div id="lookup_result_show_hide"><a id="lookup_result_gpg_link" href="#">GPG data</a></div>
@@ -98,7 +100,6 @@
         </div>
 
         <p>
-        <br />
         You can also look up addresses of Twitter users by tweeting their names to <a href="http://www.twitter.com/addressmachine">@addressmachine</a>.
         </p>
 
