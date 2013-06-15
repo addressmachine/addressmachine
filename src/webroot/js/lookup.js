@@ -19,7 +19,7 @@ document.getElementById('lookupform').onsubmit = function() {
     } else {
         service = 'email';
     }
-    var hash = hex_sha1(q);
+    var hash = hex_sha1(q.toLowerCase());
     var r = new XMLHttpRequest();
     r.open('GET', 'http://lookup.addressmachine.com/addresses/'+service+'/bitcoin/user/'+hash+'/', true);
 

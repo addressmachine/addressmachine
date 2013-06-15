@@ -86,7 +86,6 @@ class AddressMachineAddressTest extends UnitTestCase {
     function testTwitterIdentity() {
 
         $id = AddressMachineTwitterIdentity::ForIdentifier('@joiwejrfijslijdlsijdisjfdj');
-
         $addresses = $id->userBitcoinKeys();
 
         $this->assertTrue(is_array($addresses));
@@ -124,7 +123,6 @@ class AddressMachineAddressTest extends UnitTestCase {
     function testEmailIdentity() {
 
         $id = AddressMachineEmailIdentity::ForIdentifier('test1@socialminds.jp');
-
         $addresses = $id->userBitcoinKeys();
 
         $this->assertTrue(is_array($addresses));
@@ -144,6 +142,10 @@ class AddressMachineAddressTest extends UnitTestCase {
 
         $addresses = $id->userBitcoinKeys();
         $this->assertEqual(count($addresses), 1, '1 addresses for user after creation');
+
+        $id = AddressMachineEmailIdentity::ForIdentifier('TEST1@socialMINDS.JP');
+        $addresses = $id->userBitcoinKeys();
+        $this->assertEqual(count($addresses), 1, 'Mixed capitalization returns the address we created earlier');
 
         // Check the file exists on the publication server.
         // This test will only pass if the two are on the same machine.

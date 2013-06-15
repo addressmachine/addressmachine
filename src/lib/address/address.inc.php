@@ -601,7 +601,7 @@ print "\n";
 
     public static function IdentifierHash($identifier) {
 
-        return sha1($identifier);
+        return sha1(strtolower($identifier));
 
     }
 
