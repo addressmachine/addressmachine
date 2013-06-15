@@ -1,4 +1,6 @@
 /src/config.php
+/src/config.publication.php
+/src/config.botbox.php
 /data
 /secrets
 /src/webroot/addresses
