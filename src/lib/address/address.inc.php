@@ -417,6 +417,13 @@ class AddressMachinePaymentKey {
             return false;
         }
 
+        $contents = file_get_contents($file);
+
+        // TODO: Would be better to give the user some warning that the unpublishing may take some time...
+        if (!AddressMachinePublisherClient::UnPublish($contents, $file)) {
+            syslog(LOG_WARNING, "Unpublishing $file failed, will continue with local delete and hope it gets dealt with later in an rsync job");
+        }
+
         if (!$this->delete_file($file)) {
             syslog(LOG_ERR, "Could not delete file $file.");
             return false;
