@@ -62,7 +62,7 @@ document.getElementById('lookupform').onsubmit = function() {
     }
     var hash = hex_sha1(q.toLowerCase());
     var r = new XMLHttpRequest();
-    r.open('GET', 'http://lookup.addressmachine.com/addresses/'+service+'/bitcoin/user/'+hash+'/', true);
+    r.open('GET', 'https://lookup.addressmachine.com/addresses/'+service+'/bitcoin/user/'+hash+'/', true);
 
     r.onreadystatechange = function () {
 
@@ -132,7 +132,7 @@ function display_addresses(service, id, term, addresses) {
     console.log("need to validate address "+addr+" for id "+id);
 
     var r = new XMLHttpRequest();
-    r.open('GET', "http://lookup.addressmachine.com/addresses/"+service+"/bitcoin/user/"+id+"/"+addr, true);
+    r.open('GET', "https://lookup.addressmachine.com/addresses/"+service+"/bitcoin/user/"+id+"/"+addr, true);
     r.onreadystatechange = function () {
 
         if (r.readyState != 4) {
