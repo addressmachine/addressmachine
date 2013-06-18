@@ -57,29 +57,37 @@
 
            <p class="intro">
            <br />
-                Address machine is a public database that helps people pay you using <a href="http://www.bitcoin.org">Bitcoin</a>, the fast-growing peer-to-peer digital currency.
+                Address machine is a free public database that helps people pay you using <a href="http://www.bitcoin.org">Bitcoin</a>, the fast-growing peer-to-peer digital currency.
            </p>
 
             <p class="intro">
-           <form id="addform" method="POST">
-           <h4>Enter your Bitcoin address:</h4> 
-            <input name="bitcoin" id="bitcoin" style="width:100%">
+           <form id="addform" method="POST" class="unregistered">
+
+           <h4>Add your Bitcoin address:</h4> 
+            <input name="bitcoin" id="bitcoin" class="mainformtext" style="width:100%">
             <br />
-            <h4>Link it to your email address:</h4> 
-            <input name="email" id="email" style="width:300px">
-            <input type="submit" class="button" value="Link" style="float:right; width:80px;">
-            <br />
-            <h5>Or link it with Twitter by tweeting:</h5>
+            <div id="email_section" class="unregistered">
+            <h4 class="link_text">Link it to your email address:</h4> 
+            <h4 class="unlink_text">This email is already registered:</h4> 
+            <input name="email" id="email" class="mainformtext" style="width:300px">
+            <input type="hidden" id="email_toggle" name="email_toggle" value="link">
+            <input type="submit" class="button" value="Link" style="float:right; width:80px;" id="email_submit">
+            </div>
+            <div id="twitter_section" class="unregistered">
+            <h5>Link it to your Twitter name by tweeting:</h5>
             <h4 id="tweetlink"><a href="https://twitter.com/intent/tweet?text=@addressmachine%20PUT_YOUR_ADDRESS_HERE">@addressmachine [address]</a></h4>
+            </div>
            </form>
            </p>
 
+<!--
            <p class="intro">
            You can delete your addresses at any time by emailing it to <a href="mailto:delete@addressmachine.com">delete@addressmachine.com</a>.
            </p>
            <p class="intro">
            You can delete Twitter addresses by tweeting <a href="http://twitter.com/home?status=@addressmachine%20delete%20PUT_YOUR_ADDRESS_HERE">@addressmachine DELETE [address]</a>. 
            </p>
+-->
 
         </div>
 

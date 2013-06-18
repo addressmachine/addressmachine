@@ -617,11 +617,30 @@ section#about-us aside .download-btn {
     -webkit-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
 }
 
+form#addform .registered .unlink_text {
+    display:block
+}
+
+form#addform .registered .link_text {
+    display:none
+}
+
+form#addform .unregistered .unlink_text {
+    display:none
+}
+
+form#addform .unregistered .link_text {
+    display:block
+}
+
+
+
+
 form#addform {
+    background: url(../images/form-bg.png);
      margin: 10px 0 25px 0;
     padding: 30px 40px 30px 40px;
     margin-bottom:30px;
-    border:2px solid gray;
 }
 form#addform input {
     margin-bottom: 20px;
@@ -647,13 +666,16 @@ form#addform input.button {
     color: #ffffff;
     cursor: pointer;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
-
     box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
     -moz-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
     -webkit-box-shadow: 0px 1px 1px rgba(0,0,0,0.4), inset 0 1px 0 #28a441;
 }
+form#addform .registered input.button {
+	background: #ff0000; 
+    border: 1px solid #ff0000;
+}
 
-form#addform input:focus {
+form#addform input.mainformtext:focus {
 	background: #F0F0F0;
 }
 
@@ -662,7 +684,7 @@ form#addform input:focus {
 ----------------------------------------------------- */
 form#lookupform {
     width: 300px;
-    background: url(../images/form-bg.png);
+    border:2px solid gray;
      margin: 10px 0 25px 0;
     padding: 40px 40px 40px 40px;
     float:right;
