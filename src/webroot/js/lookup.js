@@ -15,7 +15,7 @@ document.getElementById('lookupform').onsubmit = function() {
         return false;
     }
 
-    document.getElementById('lookup_button').disabled = true;
+    //document.getElementById('lookup_button').disabled = true;
 
     var service;
     if (q.match(/^@/)) {
@@ -54,10 +54,6 @@ document.getElementById('lookupform').onsubmit = function() {
         }
         display_addresses(service, hash, q, data);
         
-        window.setTimeout( function() {
-            document.getElementById('lookup_button').disabled = false;
-        }, 500);
-
         return false;
     };
 
