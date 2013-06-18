@@ -1,115 +1,5 @@
 var addresses = new Array();
 
-document.body.onload = function() {
-    var val = document.getElementById('bitcoin').value;
-    if (val == '') {
-        val = '[address]';
-    }
-    document.getElementById('tweetlink').innerHTML = '<a href="https://twitter.com/intent/tweet?text=@addressmachine%20'+val+'">@addressmachine '+val+'</a>';
-}
-
-document.getElementById('bitcoin').onchange = function() {
-    if ( document.getElementById('email_section').className == 'registered' ) {
-        document.getElementById('email_section').className = 'unregistered';
-        document.getElementById('email_submit').value = 'Link';
-        document.getElementById('email_toggle').value = 'link';
-    }
-    update_twitter_display();
-}
-
-document.getElementById('email').onchange = function() {
-    if ( document.getElementById('email_section').className == 'registered' ) {
-        document.getElementById('email_section').className = 'unregistered';
-        document.getElementById('email_submit').value = 'Link';
-        document.getElementById('email_toggle').value = 'link';
-    }
-}
-
-
-/*
-document.getElementById('bitcoin').onkeyup = function() {
-    var val = document.getElementById('bitcoin').value;
-    if (val == '') {
-        val = '[address]';
-    }
-    document.getElementById('tweetlink').innerHTML = '<a href="https://twitter.com/intent/tweet?text=@addressmachine%20'+val+'">@addressmachine '+val+'</a>';
-}
-*/
-
-document.getElementById('addform').onsubmit = function() {
-
-    var toggle = document.getElementById('email_toggle').value;
-
-    var bitcoin = document.getElementById('bitcoin').value;
-    if (bitcoin== '') {
-        document.getElementById('bitcoin').focus();
-        return false;
-    }
-    var email = document.getElementById('email').value;
-    if (email == '') {
-        document.getElementById('email').focus();
-        return false;
-    }
-
-    var hash = hex_sha1(email.toLowerCase());
-
-    var r = new XMLHttpRequest();
-    r.open('GET', "https://lookup.addressmachine.com/addresses/email/bitcoin/user/"+hash+"/"+bitcoin, true);
-
-    r.onreadystatechange = function () {
-
-        if (r.readyState != 4) {
-            return;
-        }
-        if (r.status == 200) {
-            // We're supposed to be linking, but it's already linked
-            if (toggle == 'link') {
-                document.getElementById('email_section').className = 'registered';
-                document.getElementById('email_submit').value = 'Unlink';
-                document.getElementById('email_toggle').value = 'unlink';
-                //alert('already registered');
-                return false;
-            } 
-        } else {
-            // We're supposed to be unlinking, but it's already unlinked
-            if (toggle == 'unlink') {
-                document.getElementById('email_section').className = 'unregistered';
-                document.getElementById('email_submit').value = 'Link';
-                document.getElementById('email_toggle').value = 'link';
-                alert('not already registered, continue');
-                return false;
-            }
-        }
-        //return false;
-
-        // OK to go ahead and submit the actual request...
-        var r2 = new XMLHttpRequest();
-        r2.open('POST', "request.php", true);
-        r2.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-        r2.onreadystatechange = function () {
-
-            if (r2.readyState != 4) {
-                return;
-            }
-            if (r2.status == 200) {
-                console.log('ok'+r2.responseText);
-            } else {
-                console.log('request failed');
-            }
-         
-        }
-
-        r2.send('email='+email+'&bitcoin='+bitcoin+'&email_toggle='+toggle);
-
-    }
-
-    r.send();
-
-    return false;
-
-}
-
 document.getElementById('lookupform').onsubmit = function() {
 
     var q = document.getElementById('lookup').value;
@@ -124,6 +14,8 @@ document.getElementById('lookupform').onsubmit = function() {
         document.getElementById('lookup_results').style.display='none';
         return false;
     }
+
+    document.getElementById('lookup_button').disabled = true;
 
     var service;
     if (q.match(/^@/)) {
@@ -162,6 +54,9 @@ document.getElementById('lookupform').onsubmit = function() {
         }
         display_addresses(service, hash, q, data);
         
+        window.setTimeout( function() {
+            document.getElementById('lookup_button').disabled = false;
+        }, 500);
 
         return false;
     };
@@ -255,16 +150,5 @@ function display_addresses(service, id, term, addresses) {
     }
 
     r.send();
-
-}
-
-function update_twitter_display() {
-
-    var val = document.getElementById('bitcoin').value;
-    if (val == '') {
-        val = '[address]';
-        document.getElementById('tweetlink').innerHTML = '<a href="https://twitter.com/intent/tweet?text=@addressmachine%20'+val+'">@addressmachine '+val+'</a>';
-        return;
-    }
 
 }

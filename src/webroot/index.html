@@ -15,7 +15,6 @@
 
     <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
 
-
 </head>
 
 <body>
@@ -71,11 +70,26 @@
             <h4 class="unlink_text">This email is already registered:</h4> 
             <input name="email" id="email" class="mainformtext" style="width:300px">
             <input type="hidden" id="email_toggle" name="email_toggle" value="link">
-            <input type="submit" class="button" value="Link" style="float:right; width:80px;" id="email_submit">
+            <input onclick="return handle_add_form_change('email_submit');" type="submit" class="button" value="Link" style="float:right; width:80px;" id="email_submit" disabled="true">
+
+            <div style="clear:both"></div>
+            <div id="link_change_queue" style="display:none; margin-bottom:15px">
+                <div class="link_change_item" id="link_change_item_template" style="display:none">
+                    <div class="link_change_status" data-html-on-completion="Successfully added:">Waiting for confirmation, please check your email:</div>
+                    <span class="link_change_type"></span>
+                    <span class="link_change_email"></span>
+                    <span class="link_change_connector"></span>
+                    <span class="link_change_bitcoin"></span>
+                </div>
             </div>
+
+
+            </div>
+
+
             <div id="twitter_section" class="unregistered">
-            <h5>Link it to your Twitter name by tweeting:</h5>
-            <h4 id="tweetlink"><a href="https://twitter.com/intent/tweet?text=@addressmachine%20PUT_YOUR_ADDRESS_HERE">@addressmachine [address]</a></h4>
+            <h5>Link it to your Twitter name:</h5>
+            <h4>Tweet <span id="tweetlink"><a href="https://twitter.com/intent/tweet?text=@addressmachine%20PUT_YOUR_ADDRESS_HERE">@addressmachine [address]</a></span></h4>
             </div>
            </form>
            </p>
@@ -97,7 +111,7 @@
             <br />
             <label>Email address or Twitter name</label>
             <input name="lookup" type="text" id="lookup" value="" />
-            <input type="submit" value="Look up" class="button">
+            <input type="submit" value="Look up" class="button" id="lookup_button">
             <div style="clear:both"></div>
             <div id="lookup_results" style="display:none; margin-bottom:15px">
                 <div id="lookup_result_term"></div>
@@ -139,7 +153,7 @@
                 <h2>Security</h2>
 
                 <p>
-                    Addresses are individually signed with <a href="http://pgp.mit.edu:11371/pks/lookup?op=get&search=0x8FFEF9853B2F5734">our GPG keys</a> so that people can verify them without needing to trust the website that is publishing them.
+                    Addresses are individually signed with <a href="http://pgp.mit.edu:11371/pks/lookup?op=get&search=0x8FFEF9853B2F5734">our GPG key</a> so that people can verify them without needing to trust the website that is publishing them.
                 </p>
 
                 <p>
@@ -195,5 +209,7 @@
 
 <script type="text/javascript" src="js/sha1.js"></script>
 <script type="text/javascript" src="js/lookup.js"></script>
+<script type="text/javascript" src="js/add.js"></script>
+
 </body>
 </html>
