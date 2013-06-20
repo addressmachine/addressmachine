@@ -10,6 +10,18 @@ if ( !isset($_SERVER['PHP_AUTH_PW']) ) {
     exit;
 }
 
+// If these weren't in your config, we probably weren't supposed to be running this stuff in the first place.
+if ( !defined(ADDRESSMACHINE_PUBLICATION_USERNAME) || ADDRESSMACHINE_PUBLICATION_USERNAME == '' ) {
+    header('HTTP/1.0 401 Unauthorized');
+    exit;
+}
+
+if ( !defined(ADDRESSMACHINE_PUBLICATION_PASSWORD) || ADDRESSMACHINE_PUBLICATION_PASSWORD == '' ) {
+    header('HTTP/1.0 401 Unauthorized');
+    exit;
+}
+
+
 if ( $_SERVER['PHP_AUTH_USER'] != ADDRESSMACHINE_PUBLICATION_USERNAME ) {
     header('HTTP/1.0 401 Unauthorized');
     exit;
