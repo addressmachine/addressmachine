@@ -15,20 +15,22 @@ document.body.onload = function() {
     //document.getElementById('email').addEventListener ("DOMCharacterDataModified", handle_add_form_change, false);
 
 
-    handle_add_form_change();
+    handle_add_form_change('body');
 }
 
-function handle_add_form_change() {
+function handle_add_form_change(changed_entry) {
 
     var can_submit = true;
 
     // If a previous address/email pair turned out to be registered already
     // ...we will have set the "registered" flags on the form.
     // Return these to their default 'unregistered' state when the form changes.
-    if ( document.getElementById('email_section').className == 'registered' ) {
-        document.getElementById('email_section').className = 'unregistered';
-        document.getElementById('email_submit').value = 'Link';
-        document.getElementById('email_toggle').value = 'link';
+    if ( (changed_entry == 'email') || ( changed_entry == 'bitcoin') ) {
+        if ( document.getElementById('email_section').className == 'registered' ) {
+            document.getElementById('email_section').className = 'unregistered';
+            document.getElementById('email_submit').value = 'Link';
+            document.getElementById('email_toggle').value = 'link';
+        }
     }
 
     // We can't do anything else useful until we have a bitcoin address.
@@ -60,13 +62,13 @@ function handle_add_form_change() {
 
 document.getElementById('bitcoin').onchange = function() {
 
-    handle_add_form_change();
+    handle_add_form_change('bitcoin');
 
 }
 
 document.getElementById('email').onchange = function() {
 
-    handle_add_form_change();
+    handle_add_form_change('email');
 
 }
 
@@ -89,6 +91,8 @@ document.getElementById('bitcoin').onkeyup = function() {
 document.getElementById('addform').onsubmit = function() {
 
     var toggle = document.getElementById('email_toggle').value;
+    console.log('got toggle value '+toggle);
+    console.log(document.getElementById('email_toggle'));
 
     // If either of the fields is empty, throw the focus onto the missing element and return.
     var bitcoin = document.getElementById('bitcoin').value;
@@ -130,7 +134,6 @@ document.getElementById('addform').onsubmit = function() {
         if (r.readyState != 4) {
             return;
         }
-
         // Check for an attempt to link something that is already linked
         // ...or unlink something that wasn't linked in the first place.
         if (r.status == 200) {
