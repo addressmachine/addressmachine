@@ -1,7 +1,3 @@
-var addresses = new Array();
-var is_add_in_flight = false;
-var is_lookup_in_flight = false;
-
 document.body.onload = function() {
     // The browser may have kep the content from a previous form entry.
     // Otherwise it will be empty.
@@ -143,6 +139,7 @@ document.getElementById('addform').onsubmit = function() {
                 document.getElementById('email_submit').value = 'Unlink';
                 document.getElementById('email_toggle').value = 'unlink';
                 document.getElementById('email_submit').disabled = false;
+                document.getElementById('email').focus();
                 //alert('already registered');
                 return false;
             } 
@@ -153,6 +150,7 @@ document.getElementById('addform').onsubmit = function() {
                 document.getElementById('email_submit').value = 'Link';
                 document.getElementById('email_toggle').value = 'link';
                 document.getElementById('email_submit').disabled = false;
+                document.getElementById('email').focus();
                 //alert('not already registered, continue');
                 return false;
             }
@@ -169,6 +167,7 @@ document.getElementById('addform').onsubmit = function() {
             if (r2.readyState != 4) {
                 return;
             }
+
             if (r2.status == 200) {
 
                 console.log(r2.responseText);
@@ -196,7 +195,6 @@ document.getElementById('addform').onsubmit = function() {
 
                 // Start polling for when they complete this process.
                 poll_for_status_change(toggle, bitcoin, email);
-
 
             } else {
 
@@ -248,16 +246,15 @@ function poll_for_status_change(toggle, bitcoin, email) {
                 return;
             }
 
-            if (r.status == 200) {
+            // TODO: Figure out how to get apache to set CORS headers on 404 responses for not-found then check status == 404 instead of status != 200...
+            if ( ( ( toggle == 'link' ) && ( r.status == 200) ) || ( ( toggle == 'unlink' ) && ( r.status != 200) ) ) {
 
                 console.log('done');
 
                 var link_change_item = document.getElementById(link_change_item_id);
                 link_change_item_id.className = 'link_done_item';
-                link_change_item.getElementsByClassName('link_change_status')[0].innerHTML = link_change_item.getElementsByClassName('link_change_status')[0].getAttribute('data-html-on-completion');
+                link_change_item.getElementsByClassName('link_change_status')[0].innerHTML = link_change_item.getElementsByClassName('link_change_status')[0].getAttribute('data-html-on-'+toggle+'-completion');
                 link_change_item.setAttribute('data-link-change-status', 'done');
-
-                
 
                 return;
 
