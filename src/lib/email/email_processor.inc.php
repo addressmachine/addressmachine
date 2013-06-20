@@ -188,36 +188,66 @@ class email_processor {
                     }
                     */
 
-                    email_processor::verbose_output($verbose, "Preparing message...");
-                    $cmd = new AddressMachineEmailCommand();
-                    $cmd->service_email = $toaddress;
-                    $cmd->user_email = $fromaddress;
-                    $cmd->raw_body = $plainmsg ? $plainmsg : $htmlmsg;
-                    //var_dump($cmd);
-                    $response = $cmd->execute();
-
-                    if ($nodelete) {
-                        email_processor::verbose_output($verbose, "Skipping deletion of message $mid because you asked for nodelete.");
-                    } else {
-                        email_processor::verbose_output($verbose, "Deleting message $mid.");
-                        if (!$handler->delete($mid)) {
-                            email_processor::verbose_output($verbose, "Deletion of message $mid failed.");
-                        }
+                    /*
+                    We'll do some extra sanitization checks here just to make sure we're not getting anything unexpected.
+                    */
+        
+                    $service_email_options = array(
+                        'add@addressmachine.com',
+                        'delete@addressmachine.com',
+                        'lookup@addressmachine.com',
+                        'die@addressmachine.com',
+                        'revoke@addressmachine.com'
+                    );
+                    
+                    $sanitize_ok = true;
+                    if (!in_array(strtolower($toaddress), $service_email_options)) {
+                        $sanitize_ok = false;
                     }
 
-                    if ($response) {
-                        // Dump the email content instead of sending.
-                        // This allows us to test without filling up our sendgrid limits
-                        if ($printnotsend) {
-                            var_dump($response);
+                    // This might produce a false negative in some weird case, but we're on the box with our signing keys that needs to be kept secure...
+                    // ...we'd rather fail occasionally than let through something we don't understand. 
+                    if (!preg_match('/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/', $fromaddress)) {
+                        $sanitize_ok = false;
+                    }
+
+                    if ($sanitize_ok) {
+
+                        email_processor::verbose_output($verbose, "Preparing message...");
+                        $cmd = new AddressMachineEmailCommand();
+                        $cmd->service_email = $toaddress;
+                        $cmd->user_email = $fromaddress;
+                        $cmd->raw_body = $plainmsg ? $plainmsg : $htmlmsg;
+                        //var_dump($cmd);
+                        $response = $cmd->execute();
+
+                        if ($nodelete) {
+                            email_processor::verbose_output($verbose, "Skipping deletion of message $mid because you asked for nodelete.");
                         } else {
-                            $response->send();
+                            email_processor::verbose_output($verbose, "Deleting message $mid.");
+                            if (!$handler->delete($mid)) {
+                                email_processor::verbose_output($verbose, "Deletion of message $mid failed.");
+                            }
                         }
+
+                        if ($response) {
+                            // Dump the email content instead of sending.
+                            // This allows us to test without filling up our sendgrid limits
+                            if ($printnotsend) {
+                                var_dump($response);
+                            } else {
+                                $response->send();
+                            }
+                        }
+                        //imap_delete($mailbox, $mid);
+
+                        //print "skipping user mail content";
+
+                    } else {
+
+                        email_processor::verbose_output($verbose, "Message failed sanitization checks, deleting without handling.");
+
                     }
-                    //imap_delete($mailbox, $mid);
-
-                    //print "skipping user mail content";
-
                 }
 
             }

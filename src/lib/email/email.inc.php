@@ -50,7 +50,13 @@ class AddressMachineEmailCommand {
         // TODO: Handle multiple addresses
         $bits = explode(" ", $str);
         $hash = array_pop($bits);
+        if ($hash == '') {
+            syslog(LOG_WARNING, "Hash was empty for command $str");
+            return '';
+        }
+
         $payload = join(" ", $bits);
+
         //var_dump($payload);
         if (AddressMachineEmailCommand::CommandHash($payload, $user_email, $action) != $hash) {
             syslog(LOG_WARNING, "Hash mismatch in string $str");
@@ -66,6 +72,10 @@ class AddressMachineEmailCommand {
     function HashedConfirmationCommand($str, $user_email, $action) {
 
         $sig = AddressMachineEmailCommand::CommandHash($str, $user_email, $action);
+        if ($sig == '') {
+            return null;
+        }
+
         $str .= ' '.$sig;
         return base64_encode($str);
 
@@ -132,12 +142,14 @@ class AddressMachineEmailCommand {
             $this->parameter = $bits[1];
         }
 
+        // TODO: In theory we should be able to handle multiple addresses in one go...
         $lines = explode("\n", $this->text);
         foreach($lines as $line) {
             $line = preg_replace( '/[^[:print:]]/', '',$line);
             if (preg_match('/(^1[1-9A-Za-z][^OIl]{20,40})/', $line, $matches)) {
                 //print "got address :".$matches[1].":\n";
                 $this->parameter = $matches[1];
+                break;
             }
         }
 
@@ -278,9 +290,6 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= "\n";
                 $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
                 $text .= "\n";
-                $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
-                $text .= '{{UNSUBSCRIBE_TAG}}';
-                $text .= "\n";
                 $text .= "\n";
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
         }
@@ -298,9 +307,6 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
             $text .= "If you want to remove the address, please email it to delete@addressmachine.com then reply to the confirmation mail.\n";
             $text .= "\n";
             $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
-            $text .= "\n";
-            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
-            $text .= '{{UNSUBSCRIBE_TAG}}';
             $text .= "\n";
             $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
@@ -323,9 +329,6 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= "$encodedCommand\n";
                 $text .= "\n";
                 $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
-                $text .= "\n";
-                $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
-                $text .= '{{UNSUBSCRIBE_TAG}}';
                 $text .= "\n";
                 $text .= "\n";
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
@@ -350,9 +353,6 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $text .= "\n";
                 $text .= "\n";
                 $text .= 'You can delete it at any time by emailing it to delete@addressmachine.com then replying to the confirmation mail.';
-                $text .= "\n";
-                $text .= "To stop receiving emails like this in future, you can click the link below to get on our \"never email\" list:\n";
-                $text .= '{{UNSUBSCRIBE_TAG}}';
                 $text .= "\n";
                 $text .= "\n";
                 $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
@@ -410,10 +410,6 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
             $text .= "If you didn't ask me to do this, or you've changed your mind, you can ignore this email.\n";
             $text .= "\n";
             $text .= "\n";
-            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
-            $text .= '{{UNSUBSCRIBE_TAG}}';
-            $text .= "\n";
-            $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
             syslog(LOG_INFO, "Created response with confirmation command $encodedCommand");
@@ -433,10 +429,6 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
             $text .= "The problem has been logged and we'll be looking into what happened.\n";
             $text .= "\n";
             $text .= "\n";
-            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
-            $text .= '{{UNSUBSCRIBE_TAG}}';
-            $text .= "\n";
-            $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
         }
@@ -447,10 +439,7 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
             $text .= "\n";
             $text .= "The address will no longer be published on our website, but you may still receive payments from people who have already looked it up.\n";
             $text .= "\n";
-            $text .= "\n";
-            $text .= "If you keep getting emails from us because someone is sending us your email address without your consent, click here to get added to our \"never email\" list:\n";
-            $text .= '{{UNSUBSCRIBE_TAG}}';
-            $text .= "\n";
+            $text .= "If you want to add it again, you can email it to add@addressmachine.com or add it from our website.\n";
             $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
 
