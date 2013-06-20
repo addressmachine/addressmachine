@@ -95,16 +95,18 @@ p { margin-bottom: 25px; }
 p.intro { font-size: 18px; }
 
 /* links */
-a:link, a:visited {
+a {
     color: #285935;
     text-decoration: none;
     outline: 0;
     font-weight:bold;
 }
+a:link, a:visited {
+    color: #285935;
+}
 a:hover, a:focus, a:active {
     color: #5E1F00;
     text-decoration: underline;
-    font-weight:bold;
 }
 
 /* Headers */
@@ -343,7 +345,7 @@ header hgroup h1 a {
     letter-spacing: -0.9px;
     line-height: 50px;
 }
-header hgroup h1 a:link {
+header hgroup h1 a {
     color: white;
     text-shadow: 1px 1px 0 gray
 }
@@ -382,10 +384,16 @@ header nav ul {
 header nav ul li {
     float: left;
 }
-header nav ul a:link, header nav ul a:visited {
+header nav ul a {
     color: #c5c4c4;
     margin-right: 20px;
     text-shadow: 0 -1px 0 rgba(10, 10, 10, 1);
+}
+header nav ul a:link, header nav ul a:visited {
+    color: #c5c4c4;
+}
+header nav ul a:link, header nav ul a:visited {
+    color: #c5c4c4;
 }
 header nav ul a:hover,
 header nav ul a:active {
