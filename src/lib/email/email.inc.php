@@ -283,8 +283,8 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
         if (!$text && !$id = AddressMachineEmailIdentity::ForIdentifier($this->user_email)) {
 
                 $text .= "Someone, probably you, asked me to add the following address for you:\n";
-                $text .= "$this->parameter";
-                $text .= "\n";
+                $text .= "$this->parameter\n";
+                $text .= "$this->user_email\n";
                 $text .= "\n";
                 $text .= "Unfortunately something went wrong and we weren't able to do it.";
                 $text .= "\n";
@@ -299,8 +299,8 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
         if (!$text && $id->userBitcoinKeyForAddress($this->parameter)) {
             
             $text .= "Someone, probably you, asked me to add the following address for you:\n";
-            $text .= "$this->parameter";
-            $text .= "\n";
+            $text .= "$this->parameter\n";
+            $text .= "$this->user_email\n";
             $text .= "\n";
             $text .= "It looks like this address is already in our database, so we're going to do nothing.\n";
             $text .= "\n";
@@ -322,8 +322,8 @@ class AddressMachineAddEmailAction extends AddressMachineEmailAction {
                 $encodedCommand = ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.$encodedCommand.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_SUFFIX;
 
                 $text .= "Someone, probably you, asked me to add the following address for you:\n";
-                $text .= "$this->parameter";
-                $text .= "\n";
+                $text .= "$this->parameter\n";
+                $text .= "$this->user_email\n";
                 $text .= "\n";
                 $text .= "To go ahead and add it, reply to this email with the following line intact:\n";
                 $text .= "$encodedCommand\n";
@@ -402,7 +402,10 @@ class AddressMachineDeleteEmailAction extends AddressMachineEmailAction {
             $encodedCommand = AddressMachineEmailCommand::HashedConfirmationCommand($command, $this->user_email, $this->action);
             $encodedCommand = ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.$encodedCommand.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_SUFFIX;
 
-            $text .= "Someone, probably you, asked me to delete the following address for you.\n";
+            $text .= "Someone, probably you, asked me to delete the following address for you;\n";
+            $text .= "$addr\n";
+            $text .= "$this->user_email\n";
+            $text .= "\n";
             $text .= "\n";
             $text .= "To go ahead and delete it, reply to this email with the following line intact:\n";
             $text .= "$encodedCommand\n";
