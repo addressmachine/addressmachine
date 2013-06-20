@@ -123,16 +123,16 @@ document.getElementById('addform').onsubmit = function() {
 
     var r = new XMLHttpRequest();
     var lookup_url = "https://lookup.addressmachine.com/addresses/email/bitcoin/user/"+hash+"/"+bitcoin;
-    r.open('GET', lookup_url, true);
+    var r = createCORSRequest('GET', lookup_url);
 
-    r.onreadystatechange = function () {
+    r.onload = function () {
 
-        if (r.readyState != 4) {
-            return;
-        }
+        var data = JSON.parse(r.responseText);
+        var found = (data && data.gpg_signed_data);
+
         // Check for an attempt to link something that is already linked
         // ...or unlink something that wasn't linked in the first place.
-        if (r.status == 200) {
+        if (found) {
             // We're supposed to be linking, but it's already linked
             if (toggle == 'link') {
                 document.getElementById('email_section').className = 'registered';
@@ -237,17 +237,14 @@ function poll_for_status_change(toggle, bitcoin, email) {
         var hash = hex_sha1(email.toLowerCase());
         var lookup_url = "https://lookup.addressmachine.com/addresses/email/bitcoin/user/"+hash+"/"+bitcoin;
 
-        var r = new XMLHttpRequest();
-        r.open('GET', lookup_url, true);
+        var r = createCORSRequest('GET', lookup_url);
 
-        r.onreadystatechange = function () {
+        r.onload = function () {
 
-            if (r.readyState != 4) {
-                return;
-            }
+            var data = JSON.parse(r.responseText);
+            var found = (data && data.gpg_signed_data);
 
-            // TODO: Figure out how to get apache to set CORS headers on 404 responses for not-found then check status == 404 instead of status != 200...
-            if ( ( ( toggle == 'link' ) && ( r.status == 200) ) || ( ( toggle == 'unlink' ) && ( r.status != 200) ) ) {
+            if ( ( ( toggle == 'link' ) && ( found ) ) || ( ( toggle == 'unlink' ) && ( !found ) ) ) {
 
                 console.log('done');
 

@@ -10,6 +10,7 @@ document.getElementById('lookupform').onsubmit = function() {
     }
 
     if (!isSubmittable) {
+    console.log('not submitted');
         document.getElementById('lookup').focus();
         document.getElementById('lookup_results').style.display='none';
         return false;
@@ -24,26 +25,12 @@ document.getElementById('lookupform').onsubmit = function() {
         service = 'email';
     }
     var hash = hex_sha1(q.toLowerCase());
-    var r = new XMLHttpRequest();
-    r.open('GET', 'https://lookup.addressmachine.com/addresses/'+service+'/bitcoin/user/'+hash+'/', true);
 
-    r.onreadystatechange = function () {
-
-        if (r.readyState != 4) {
-            return;
-        }
-        if (r.status == 404) {
-            display_no_address(service, q);
-            return false;
-        } else if (r.status != 200) {
-            // Currently the apache server at lookup.addressmachine.com isn't setting CORS headers for 404s.
-            // This means that a response that should come back with a 404 status appear to JavaScript to have a status of 0.
-            // For now, we'll treat zero status as if it's a 404, ie as if the search was fine, but showed a negative result.
-            // Later, we'll fix this by either persuading apache to send us CORS headers even on 404s or by making it send us an empty list instead.
-            display_no_address(service, q);
-            //alert('wonky status:'+r.status);
-            return false;
-        }
+    var r = createCORSRequest('GET', 'https://lookup.addressmachine.com/addresses/'+service+'/bitcoin/user/'+hash+'/'); 
+    if (!r) {
+        alert('cors request failed');
+    }
+    r.onload = function () {
 
         document.getElementById('lookup_results').innerHTML += '';
 
@@ -51,7 +38,9 @@ document.getElementById('lookupform').onsubmit = function() {
         var data = JSON.parse(r.responseText);
         if (data.length == 0) {
             display_no_address(service, q);
+            return false;
         }
+
         display_addresses(service, hash, q, data);
         
         return false;
@@ -93,28 +82,25 @@ function display_addresses(service, id, term, addresses) {
     }
     console.log("need to validate address "+addr+" for id "+id);
 
-    var r = new XMLHttpRequest();
-    r.open('GET', "https://lookup.addressmachine.com/addresses/"+service+"/bitcoin/user/"+id+"/"+addr, true);
-    r.onreadystatechange = function () {
-
-        if (r.readyState != 4) {
-            return;
-        }
-        if (r.status == 404) {
-            alert('GPG-signed data not found');
-            return false;
-        } else if (r.status != 200) {
-            alert('Error:'+r.status);
-            return false;
-        }
+    var r = createCORSRequest('GET', "https://lookup.addressmachine.com/addresses/"+service+"/bitcoin/user/"+id+"/"+addr);
+    r.onload = function () {
+        
         console.log(r.responseText);
         var data = JSON.parse(r.responseText);
+
+        if (!data.payload) {
+            console.log("need to validate address "+addr+" for id "+id);
+            alert('Error: Data no longer there.');
+            return;
+        }
+        /*
         for (var i=0; i<data.length; i++) {
             var item = data[i];
             if (typeof item == 'string') {
                 validate_address(hash, item);
             }
         }
+        */
 
         console.log(data);
         var address = data.payload.address;

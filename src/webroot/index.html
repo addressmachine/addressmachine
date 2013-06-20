@@ -45,7 +45,7 @@
 <!-- content-wrap -->
 <div class="content-wrap">
 
-    <section id="" style="text-align:center; color:red; font-weight:bold; background-color:gray; color:white; padding-bottom:14px; height:20px; padding-top:80px; text-shadow:none">
+    <section id="testingwarning" style="text-align:center; color:red; font-weight:bold; background-color:gray; color:white; padding-bottom:14px; height:20px; padding-top:80px; text-shadow:none">
     This site is currently in the testing phase, and may misbehave.
     </section>
 
@@ -59,7 +59,6 @@
                 Address machine is a free public database that helps people pay you using <a href="http://www.bitcoin.org">Bitcoin</a>, the fast-growing peer-to-peer digital currency.
            </p>
 
-            <p class="intro">
            <form id="addform" method="POST" class="unregistered">
 
            <h4>Add your Bitcoin address:</h4> 
@@ -70,7 +69,7 @@
             <h4 class="unlink_text">This email is already registered:</h4> 
             <input name="email" id="email" class="mainformtext" style="width:300px">
             <input type="hidden" id="email_toggle" name="email_toggle" value="link">
-            <input type="submit" class="button" value="Link" style="float:right; width:80px;" id="email_submit" disabled="true">
+            <input type="submit" class="button" value="Link" style="float:right; width:80px;" id="email_submit" disabled="disabled">
 
             <div style="clear:both"></div>
             <div id="link_change_queue" style="display:none; margin-bottom:15px">
@@ -92,7 +91,6 @@
             <h4>Tweet <span id="tweetlink"><a href="https://twitter.com/intent/tweet?text=@addressmachine%20PUT_YOUR_ADDRESS_HERE">@addressmachine [address]</a></span></h4>
             </div>
            </form>
-           </p>
 
 <!--
            <p class="intro">
@@ -153,7 +151,7 @@
                 <h2>Security</h2>
 
                 <p>
-                    Addresses are individually signed with <a href="http://pgp.mit.edu:11371/pks/lookup?op=get&search=0x8FFEF9853B2F5734">our GPG key</a> so that people can verify them without needing to trust the website that is publishing them.
+                    Addresses are individually signed with <a href="http://pgp.mit.edu:11371/pks/lookup?op=get&amp;search=0x8FFEF9853B2F5734">our GPG key</a> so that people can verify them without needing to trust the website that is publishing them.
                 </p>
 
                 <p>
@@ -207,6 +205,7 @@
 
 </footer>
 
+<script type="text/javascript" src="js/common.js"></script>
 <script type="text/javascript" src="js/sha1.js"></script>
 <script type="text/javascript" src="js/lookup.js"></script>
 <script type="text/javascript" src="js/add.js"></script>
