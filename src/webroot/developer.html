@@ -59,7 +59,7 @@ We recommend that you send us SHA1 hashes of the email addresses and Twitter nam
 </p>
 
 <p>
-The following will produce a JSON array of addresses, or a 404 if the user is not registered.
+The following will produce a JSON array of addresses, or an empty array if the user is not found.
 </p>
 
 <p>
@@ -68,7 +68,7 @@ https://lookup.addressmachine.com/addresses/&lt;service&gt;/bitcoin/user/&lt;sha
 </pre></b>
 <ul>
 <li><b>&lt;service&gt;</b> is either <i>email</i> or <i>twitter</i>.</li>
-<li><b>&lt;sha1&gt;</b> is an SHA1 hash of the username or Twitter handle, in lower case.</li>
+<li><b>&lt;sha1&gt;</b> is an SHA1 hash of the email address or Twitter handle, in lower case.</li>
 </ul>
 </p>
 
@@ -82,7 +82,7 @@ https://lookup.addressmachine.com/addresses/&lt;service&gt;/bitcoin/user/&lt;sha
 </pre></b>
 <ul>
 <li><b>&lt;service&gt;</b> is either <i>email</i> or <i>twitter</i>.</li>
-<li><b>&lt;sha1&gt;</b> is an SHA1 hash of the username or Twitter handle, in lower case.</li>
+<li><b>&lt;sha1&gt;</b> is an SHA1 hash of the email address or Twitter handle, in lower case.</li>
 <li><b>&lt;address&gt;</b> is a Bitcoin address.</li>
 </ul>
 </p>
@@ -93,7 +93,7 @@ The lookup server supports <a href="http://enable-cors.org/">CORS</a> to allow c
 
 
 <p>
-A 404 code will be returned if the full resource cannot be found, which should usually only happen if the user has deleted the data since you fetched the list of addresses.
+An empty JSON object will be returned if the full resource cannot be found, which should usually only happen if the user has deleted the data since you fetched the list of addresses.
 </p>
 
 <p>
