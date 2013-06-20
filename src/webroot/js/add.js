@@ -130,6 +130,8 @@ document.getElementById('addform').onsubmit = function() {
         var data = JSON.parse(r.responseText);
         var found = (data && data.gpg_signed_data);
 
+        console.log('Response was '+r.responseText);
+
         // Check for an attempt to link something that is already linked
         // ...or unlink something that wasn't linked in the first place.
         if (found) {
