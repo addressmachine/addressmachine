@@ -7,12 +7,24 @@ $email = $_POST['email'];
 $bitcoin = $_POST['bitcoin'];
 $email_toggle = $_POST['email_toggle'];
 
-if (!$email || !$bitcoin) {
-    print 'Params NG';
-    exit;
+$response = new stdClass();
+$response->result = false;
+$response->invalid_fields = array();
+
+if (!preg_match('/(^1[1-9A-Za-z][^OIl]{20,40})/', $bitcoin)) {
+    $response->invalid_fields[] = 'bitcoin';
+}
+
+if (!preg_match('/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/', $email)) {
+    $response->invalid_fields[] = 'email';
 }
 
 $action = ( $email_toggle == 'link' ) ? 'add' : 'delete';
-$ok = mail( $action.'@addressmachine.com', 'form', $bitcoin, 'Reply-To: '.$email);
-print $ok ? 'OK' : 'NG';
+
+if ( count($response->invalid_fields) == 0 ) {
+    $response->result = mail( $action.'@addressmachine.com', 'form', $bitcoin, 'Reply-To: '.$email);
+}
+
+print json_encode($response);
+
 exit;

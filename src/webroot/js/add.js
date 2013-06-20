@@ -172,7 +172,21 @@ document.getElementById('addform').onsubmit = function() {
 
             if (r2.status == 200) {
 
-                console.log(r2.responseText);
+
+                var response_data = JSON.parse(r2.responseText);
+                console.log(response_data);
+                if (!response_data || !response_data.result) {
+                    console.log('failed');
+                    if (response_data.invalid_fields) {
+                        for (var i = response_data.invalid_fields.length; i >= 0; i--) {
+                            // TODO: Set error style and show a useful message
+                            if (document.getElementById(response_data.invalid_fields[i])) {
+                                document.getElementById(response_data.invalid_fields[i]).focus(); 
+                            }
+                        }
+                    }
+                    return false;
+                }
 
                 // clone the template
                 var link_change_item = document.createElement('div');
