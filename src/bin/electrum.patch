@@ -1,0 +1,16 @@
+291c291
+<         password = prompt_password("Password (hit return if you do not wish to encrypt your wallet):")
+---
+>         password = "" # prompt_password("Password (hit return if you do not wish to encrypt your wallet):")
+296,300c296,300
+<         host = raw_input("server (default:%s):"%w_host)
+<         port = raw_input("port (default:%s):"%w_port)
+<         protocol = raw_input("protocol [t=tcp;h=http;n=native] (default:%s):"%w_protocol)
+<         fee = raw_input("fee (default:%s):"%( str(Decimal(wallet.fee)/100000000)) )
+<         gap = raw_input("gap limit (default 5):")
+---
+>         host = "" # raw_input("server (default:%s):"%w_host)
+>         port = "" # raw_input("port (default:%s):"%w_port)
+>         protocol = "" # raw_input("protocol [t=tcp;h=http;n=native] (default:%s):"%w_protocol)
+>         fee = "" # raw_input("fee (default:%s):"%( str(Decimal(wallet.fee)/100000000)) )
+>         gap = "" # raw_input("gap limit (default 5):")
