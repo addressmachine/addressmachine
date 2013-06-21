@@ -161,6 +161,32 @@ abstract class AddressMachineIdentity {
 
     }
 
+    // Create a key object and give it a temporary seed and address
+    // ...but don't actually save it yet.
+    // We'll communicate the seed to the owner first
+    function seededTempKey() {
+
+        if (!$this->identifier) {
+            return false;
+        }
+        
+        $key = new AddressMachinePaymentKey();
+        $key->identifier = $this->identifier;
+        $key->keytype = ADDRESSMACHINE_KEY_TYPE_TEMP; 
+        $key->service = $this->service;
+        $key->paymenttype = 'bitcoin';
+        $key->creationdate = gmdate('Y-m-d H:i:s');
+        $key->status = 'active';
+
+        // should populate $key->seed and $key->address
+        if (!$key->seed()) {
+            return null;
+        }
+
+        return $key;
+
+    }
+
     function tempBitcoinKeyForAddress($addr) {
 
         return $this->bitcoinKeyForAddressAndKeyType($addr, ADDRESSMACHINE_KEY_TYPE_TEMP);
@@ -189,7 +215,7 @@ abstract class AddressMachineIdentity {
         $key = new AddressMachinePaymentKey();
         $key->identifier = $this->identifier;
         $key->address = $addr;
-        $key->keytype = ADDRESSMACHINE_KEY_TYPE_USER;
+        $key->keytype = $keytype;
         $key->service = $this->service;
         $key->paymenttype = 'bitcoin';
         $key->creationdate = gmdate('Y-m-d H:i:s');
@@ -262,6 +288,8 @@ class AddressMachinePaymentKey {
     var $paymenttype;
     var $creationdate;
     var $status; // only "active" implemented so far...
+
+    var $seed; // This is used in the case of temp keys. It's only held here temporarily for sending to the owner.
 
     static public function ForStdClass($obj) {
 
@@ -684,6 +712,37 @@ print "\n";
         }
 
         return $service_path.'/'.$paymenttype_path.'/'.$keytype.'/'.$identifierhash;
+
+    }
+
+    function seed() {
+
+        if (!defined('ADDRESSMACHINE_ELECTRUM_SCRIPTABLE') || (ADDRESSMACHINE_ELECTRUM_SCRIPTABLE == '')) {
+            syslog(LOG_ERR, "ADDRESSMACHINE_ELECTRUM_SCRIPTABLE not defined, cannot make a seed");
+            return false;
+        }
+        if (!defined('ADDRESSMACHINE_ELECTRUM_WORKING_DIRECTORY') || (ADDRESSMACHINE_ELECTRUM_WORKING_DIRECTORY == '')) {
+            syslog(LOG_ERR, "ADDRESSMACHINE_ELECTRUM_WORKING_DIRECTORY not defined, cannot make a seed");
+            return false;
+        }
+        if (!file_exists(ADDRESSMACHINE_ELECTRUM_WORKING_DIRECTORY)) {
+            syslog(LOG_ERR, "Electrum working directory ".ADDRESSMACHINE_ELECTRUM_WORKING_DIRECTORY." does not exist, cannot make a seed");
+            return false;
+        }
+
+        $cmd = 'WALLET="'.ADDRESSMACHINE_ELECTRUM_WORKING_DIRECTORY.'/wallet$$" && '.ADDRESSMACHINE_ELECTRUM_SCRIPTABLE.' -o -g text -w "$WALLET" create | grep -B1 \'generation seed\' | perl -pe \'s/Your wallet generation seed is//g; s/\n//g; s/\s//g\' && rm $WALLET';
+
+        $output = exec($cmd);
+
+        $bits = explode(':', $output);
+        if (count($bits) != 2) {
+            syslog(LOG_ERR, "Wrong number of parameters our output format returned from electrum command.");
+            return false;
+        }
+        $this->address = $bits[0];
+        $this->seed = $bits[1];
+
+        return true;
 
     }
 

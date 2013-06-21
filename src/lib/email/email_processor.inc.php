@@ -197,6 +197,7 @@ class email_processor {
                         'delete@addressmachine.com',
                         'lookup@addressmachine.com',
                         'die@addressmachine.com',
+                        'temp@addressmachine.com',
                         'revoke@addressmachine.com'
                     );
                     

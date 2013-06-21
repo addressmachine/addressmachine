@@ -19,7 +19,7 @@ class AddressMachineEmailCommand {
     var $action;
 
     var $availableEmailActionClasses = array(
-        //'TEMP'   => 'AddressMachineTempEmailAction', // lookup or create temporary
+        'TEMP'   => 'AddressMachineTempEmailAction', // lookup or create temporary
         'LOOKUP' => 'AddressMachineLookupEmailAction', // lookup only
         'ADD'    => 'AddressMachineAddEmailAction', // register a new address
         'DELETE' => 'AddressMachineDeleteEmailAction', // delete an address
@@ -132,25 +132,49 @@ class AddressMachineEmailCommand {
 
         $confirm_pattern = '/'.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_PREFIX.'('.$base_64_pattern.')'.ADDRESSMACHINE_EMAIL_CONFIRMATION_STRING_SUFFIX.'/';
 
-        // Confirmation commands should contain the action , eg ADD, then the parameter, eg a Bitcoin address
-        if (preg_match($confirm_pattern, $this->text, $matches)) {
-            // Throw away the rest and use the matching bit
-            $this->text = AddressMachineEmailCommand::UnhashedConfirmationCommand($matches[1], $this->user_email, $this->action);
-            //var_dump($this->text);
-            $this->is_confirmation = true;
-            $bits = explode(" ", $this->text);
-            $this->parameter = $bits[1];
-        }
+        if (in_array($this->action, array('ADD', 'DELETE'))){
 
-        // TODO: In theory we should be able to handle multiple addresses in one go...
-        $lines = explode("\n", $this->text);
-        foreach($lines as $line) {
-            $line = preg_replace( '/[^[:print:]]/', '',$line);
-            if (preg_match('/(^1[1-9A-Za-z][^OIl]{20,40})/', $line, $matches)) {
-                //print "got address :".$matches[1].":\n";
-                $this->parameter = $matches[1];
-                break;
+            // Confirmation commands should contain the action , eg ADD, then the parameter, eg a Bitcoin address
+            if (preg_match($confirm_pattern, $this->text, $matches)) {
+
+                // Throw away the rest and use the matching bit
+                $this->text = AddressMachineEmailCommand::UnhashedConfirmationCommand($matches[1], $this->user_email, $this->action);
+                //var_dump($this->text);
+                $this->is_confirmation = true;
+                $bits = explode(" ", $this->text);
+                $this->parameter = $bits[1];
+
             }
+
+            // Look for a bitcoin address
+
+            // TODO: In theory we should be able to handle multiple addresses in one go...
+            $lines = explode("\n", $this->text);
+            foreach($lines as $line) {
+                $line = preg_replace( '/[^[:print:]]/', '',$line);
+                if (preg_match('/(^1[1-9A-Za-z][^OIl]{20,40})/', $line, $matches)) {
+                    //print "got address :".$matches[1].":\n";
+                    $this->parameter = $matches[1];
+                    break;
+                }
+            }
+
+
+        } else if (in_array($this->action, array('LOOKUP', 'TEMP'))) {
+
+            // Look for an email address
+
+            // TODO: In theory we should be able to handle multiple addresses in one go...
+            $lines = explode("\n", $this->text);
+            foreach($lines as $line) {
+                $line = preg_replace( '/[^[:print:]]/', '',$line);
+                if (preg_match('/^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$/', $line, $matches)) {
+                    //print "got address :".$matches[1].":\n";
+                    $this->parameter = $matches[1];
+                    break;
+                }
+            }
+
         }
 
         return true;
@@ -179,6 +203,7 @@ class AddressMachineEmailCommand {
         $obj->parameter = $this->parameter;
         $obj->is_confirmation = $this->is_confirmation;
         $obj->action = $this->action;
+        $obj->text = $this->text;
 
         return $obj;
 
@@ -256,9 +281,77 @@ class AddressMachineLookupEmailAction extends AddressMachineEmailAction {
 class AddressMachineTempEmailAction extends AddressMachineEmailAction {
 
     public function execute() {
-        print "TODO: do actual lookup, or create an address if it fails";
-        $text = 'test';
+
+        $identifier = $this->parameter;
+
+        $id = AddressMachineEmailIdentity::ForIdentifier($identifier);
+        $user_keys = $id->userBitcoinKeys();
+
+        $text = '';
+
+        // If they have a user key, refuse to return a temp one and give them the user one instead.
+        if (!$text && ( count($user_keys) > 0 ) ) {
+            // TODO: Think about the method of choosing between multiple keys.
+            $key = $keys[0];
+            $text = 'You can pay '.$identifier .' at '.$key->address.' which is the address they registered.';
+        }
+
+        // Populate the key with a seed first, and try to DM the user with the seed.
+        // Only save the key once we've sent the message to the user.
+        // If the message fails we don't want anybody using the address.
+        if (!$text && !$key = $id->seededTempKey() ) {
+            $text = 'Sorry, I was unable to create a temporary key for '.$identifier;
+        }
+
+        if (!$text && ( !$seed = $key->seed || !$address = $key->address) ) {
+            $text = 'Sorry, I was unable to create a temporary key for '.$identifier;
+        }
+
+        if (!$text) {
+            
+            $temp_text =  "Someone claiming to be ".$this->user_email.", asked to create a temporary Bitcoin address for you so that they can send you some Bitcoins.\n";
+            $temp_text .= "\n";
+            $temp_text .= 'I have made you an address at '.$key->address." and told them about it.\n";
+            $temp_text .= 'You can see if they send you Bitcoins on this page:'."\n";
+            $temp_text .= 'http://blockchain.info/address/'.$key->address."\n";
+            $temp_text .= "\n";
+            $temp_text .= "See the following page for information on how to access any Bitcoins they may send you.\n";
+            $temp_text .= "http://electrum.org/tutorials.html#restoring-seed\n";
+            $temp_text .= 'You will need the following secret "seed": '.$key->seed."\n";
+            $temp_text .= "\n";
+            $temp_text .= "Do not lose the seed, because we do not keep a copy of it after we send this email.\n";
+            $temp_text .= "\n";
+            $temp_text .= 'Since we created this ourselves and sent it over email, which isn\'t very secure, we recommend that you transfer the Bitcoins to another wallet.'."\n";
+            $temp_text .= "\n";
+            $temp_text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+
+
+            $email = new AddressMachineEmailMessage();
+            $email->service_email = $this->service_email;
+            $email->user_email = $identifier;
+            $email->text = $temp_text;
+
+            if ($email->send()) {
+
+                $text =  "You or someone claiming to be you (".$this->user_email."), asked us to create a temporary Bitcoin address for $identifier so that you can send you some Bitcoins.\n";
+                $text .= "\n";
+                $text .= 'I have made an address for them at '.$key->address."\n";
+                $text .= "\n";
+                $text .= "I have emailed them the address and some secret information to access any Bitcoins you may send them.\n";
+                $text .= "I cannot be certain that they will receive this message, and if they don't get it there will be no way to retrieve any bitcoins you send to that address. I do not keep their secret information after I have send the email.\n";
+                $text .= "You should probably check with them before sending them a lot of Bitcoins.\n";
+                $text .= "\n";
+                $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+
+            } else {
+
+                $text = 'Sorry, I was unable to send a message to '.$identifier.' to give them a new wallet.';
+
+            }
+        }
+
         return $this->response($text);
+
     }
 
 }
@@ -486,6 +579,7 @@ class AddressMachineEmailMessage {
             'add@addressmachine.com' => 'Address Machine (Add)',
             'delete@addressmachine.com' => 'Address Machine (Delete)',
             'lookup@addressmachine.com' => 'Address Machine (Lookup)',
+            'temp@addressmachine.com' => 'Address Machine (Temporary Address)',
         );
 
         if (!isset($address_names[$service_email])) {
@@ -508,7 +602,7 @@ class AddressMachineEmailMessage {
         $headers =  "From: {$name} <{$service_email}>" . "\r\n"; 
         $headers .= "Reply-To: {$name} <{$service_email}>" . "\r\n"; 
 
-        mail($this->user_email, "Address Machine Request", $txt, $headers);
+        return mail($this->user_email, "Address Machine Request", $txt, $headers);
 
         //$twitter_req = OAuthRequest::from_consumer_and_token($consumer, $acc_token, 'POST', ADDRESSMACHINE_TWITTER_UPDATE_STATUS_URL, $options);
         //$twitter_req->sign_request($sig_method, $consumer, $acc_token);

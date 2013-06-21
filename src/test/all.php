@@ -133,6 +133,29 @@ class AddressMachineAddressTest extends UnitTestCase {
             $this->assertTrue($addr->delete(), 'Delete OK');
         }
 
+        $seeded_key = $id->seededTempKey();
+        $this->assertIsA($seeded_key, 'AddressMachinePaymentKey');
+        $seed = $seeded_key->seed;
+        $this->assertNotEqual($seed, '', 'Seed returned from electrum');
+
+        $temp_addresses = $id->tempBitcoinKeys();
+        $this->assertEqual(count($temp_addresses), 0, 'No temp addresses for user at start of test. This may be caused by a previous failure to clean up.');
+        $temp_key = $id->addTempBitcoinKeyByAddress('12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
+
+
+
+        foreach($temp_addresses as $addr) {
+            $this->assertTrue($addr->delete(), 'Delete OK');
+        }
+        $addresses = $id->tempBitcoinKeys();
+        $this->assertTrue(is_array($addresses));
+        $this->assertEqual(count($addresses), 1, 'Made a temp key ok.');
+        $this->assertIsA($temp_key, 'AddressMachinePaymentKey');
+        $this->assertTrue($temp_key->delete());
+
+        //$this->assertNotNull($key);
+        //$this->assertIsA($key, 'AddressMachinePaymentKey');
+
         $key = $id->addUserBitcoinKeyByAddress('12G3vYbNmJWpxUbNmvzdLb7mySGvSvz68Z');
 
         $this->assertNotNull($key);
