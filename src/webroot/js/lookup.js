@@ -41,7 +41,7 @@ document.getElementById('lookupform').onsubmit = function() {
             return false;
         }
 
-        display_addresses(service, hash, q, data);
+        display_addresses(service, hash, q, data.active);
         
         return false;
     };
