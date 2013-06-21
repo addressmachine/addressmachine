@@ -59,7 +59,11 @@ We recommend that you send us SHA1 hashes of the email addresses and Twitter nam
 </p>
 
 <p>
-The following will produce a JSON array of addresses, or an empty array if the user is not found.
+The lookup server supports <a href="http://enable-cors.org/">CORS</a> to allow cross-domain requests using JavaScript.
+</p>
+
+<p>
+The following a JSON object containing an array of "active" addresses and an array of "revoked" addresses. Both will be empty if we do not have any addresses registered for that user. "Revoked" addresses are not yet implemented, so this array will always be empty. 
 </p>
 
 <p>
@@ -70,6 +74,12 @@ https://lookup.addressmachine.com/addresses/&lt;service&gt;/bitcoin/user/&lt;sha
 <li><b>&lt;service&gt;</b> is either <i>email</i> or <i>twitter</i>.</li>
 <li><b>&lt;sha1&gt;</b> is an SHA1 hash of the email address or Twitter handle, in lower case.</li>
 </ul>
+For example, to look up addresses for the Twitter name @edmundedgar, which has the SHA1 hash 8aaaefb7fabb3de0060ef2d29d595c1df456f410, you would call:<br />
+<a href="https://lookup.addressmachine.com/addresses/twitter/bitcoin/user/8aaaefb7fabb3de0060ef2d29d595c1df456f410/">https://lookup.addressmachine.com/addresses/twitter/bitcoin/user/8aaaefb7fabb3de0060ef2d29d595c1df456f410/</a>
+</p>
+
+<p>This will produce an object containing an "active" list of Bitcoin addresses, or an empty list if we don't have a Bitcoin address for @edmundedgar.<br />
+<textarea style="width:100%" rows="1">{"active":[&quot;1Q4uC95NvGSw3JrmFAcc4ZDRDNGZ2u3bFT&quot;],"revoked":[]}</textarea>
 </p>
 
 <p>
@@ -87,10 +97,28 @@ https://lookup.addressmachine.com/addresses/&lt;service&gt;/bitcoin/user/&lt;sha
 </ul>
 </p>
 
-<p>
-The lookup server supports <a href="http://enable-cors.org/">CORS</a> to allow cross-domain requests using JavaScript.
+For example, to look up the detail for @edmundedgar's address 1Q4uC95NvGSw3JrmFAcc4ZDRDNGZ2u3bFT, you would call:<br />
+<a href="https://lookup.addressmachine.com/addresses/twitter/bitcoin/user/8aaaefb7fabb3de0060ef2d29d595c1df456f410/1Q4uC95NvGSw3JrmFAcc4ZDRDNGZ2u3bFT">https://lookup.addressmachine.com/addresses/twitter/bitcoin/user/8aaaefb7fabb3de0060ef2d29d595c1df456f410/1Q4uC95NvGSw3JrmFAcc4ZDRDNGZ2u3bFT</a>
 </p>
 
+<p>
+This will produce the following JSON object:
+<br />
+<textarea style="width:100%" rows="12">
+{"gpg_signed_data":"-----BEGIN PGP SIGNED MESSAGE-----\nHash: SHA1\n\n{\"address\":\"1Q4uC95NvGSw3JrmFAcc4ZDRDNGZ2u3bFT\",\"identifierhash\":\"8aaaefb7fabb3de0060ef2d29d595c1df456f410\",\"keytype\":\"user\",\"paymenttype\":\"bitcoin\",\"creationdate\":\"2013-06-20 12:58:16\",\"service\":\"twitter\"}\n-----BEGIN PGP SIGNATURE-----\nVersion: GnuPG v1.4.11 (GNU\/Linux)\n\niQEcBAEBAgAGBQJRwvxoAAoJEI\/++YU7L1c0zj8H\/iF4hfBZEBg1q5aFtme762gE\nvnCtdHfgAmLIQyIdAy3iQBKmjLraADE\/lG49KJLCD0WaN8tjf13lTynUMXwTIsYE\nsMSf5pIUj3uU5m7OSr0leg5ApclLSmgfkV\/gulPT9bAmlOvNtjPPxabZNXZlZ8uI\nsp6Prh20Z+mLyuyfnyxNgaAcFQJ6NsWwvWvaMyY\/E8ybESmHPFcgrWVOp2\/mqT\/z\npQoQlOmW+zE0IEORrSD1ZGzwJXJxN449PX70ms6jXzSukrH3fCeU8EpAHl59deEh\nyZRihsO5X8dYChtxyXY1VByruAN+KrQ9hujvRT1pHr9JdfJGMDsVTnS\/nNb0PNk=\n=xMmf\n-----END PGP SIGNATURE-----\n","payload":{"address":"1Q4uC95NvGSw3JrmFAcc4ZDRDNGZ2u3bFT","identifierhash":"8aaaefb7fabb3de0060ef2d29d595c1df456f410","keytype":"user","paymenttype":"bitcoin","creationdate":"2013-06-20 12:58:16","service":"twitter"}}
+</textarea>
+<br />
+This consists of the following data:
+<table>
+    <tr><td rowspan="6">payload</td><td>address</td><td>The Bitcoin address</td></tr>
+    <tr>                       <td>identifierhash</td><td>The SHA1 hash of the Twitter handle or email address</td></tr>
+    <tr>                       <td>keytype</td><td>"user" or "temp" for an address we created for the user (not implemented yet).</td></tr>
+    <tr>                       <td>paymenttype</td><td>"bitcoin", "litecoin", etc. Currently always bitcoin.</td></tr>
+    <tr>                       <td>creationdate</td><td>UTC Date the key was registered in the format Y-m-d H:i:s</td></tr>
+    <tr>                       <td>service</td><td>"email" or "twitter".</td></tr>
+    <tr><td rowspan="1">gpg_signed_data</td><td colspan="2">The above data, as its original string, signed with our GPG key</td></tr>
+</table>
+</p>
 
 <p>
 An empty JSON object will be returned if the full resource cannot be found, which should usually only happen if the user has deleted the data since you fetched the list of addresses.

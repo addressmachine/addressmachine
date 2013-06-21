@@ -329,7 +329,9 @@ class AddressMachinePaymentKey {
 
         $file= $path.'/list.json';
 
-        $ret = array();
+        $obj = new stdClass();
+        $obj->active = array();
+        $obj->revoked = array();
 
         while (false !== ($entry = readdir($handle))) {
 
@@ -345,7 +347,9 @@ class AddressMachinePaymentKey {
                 continue;
             }
 
-            $ret[] = $entry;
+            // TODO: When we implement revocation we'll want to check here to see which is which.
+            // Until then just assume everything is active.
+            $obj->active[] = $entry;
 
             syslog(LOG_DEBUG, "Found address entry for $entry .");
 
@@ -353,7 +357,7 @@ class AddressMachinePaymentKey {
 
         closedir($handle);
 
-        $contents = json_encode($ret);
+        $contents = json_encode($obj);
 
         if (!$handle = fopen($file, 'w')) {
             syslog(LOG_ERR, "Could not open file $file to write.");

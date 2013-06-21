@@ -36,7 +36,7 @@ document.getElementById('lookupform').onsubmit = function() {
 
         console.log(r.responseText);
         var data = JSON.parse(r.responseText);
-        if (data.length == 0) {
+        if (!data.active || data.active.length == 0) {
             display_no_address(service, q);
             return false;
         }
