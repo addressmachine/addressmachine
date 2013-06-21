@@ -193,6 +193,7 @@ abstract class AddressMachineIdentity {
         $key->service = $this->service;
         $key->paymenttype = 'bitcoin';
         $key->creationdate = gmdate('Y-m-d H:i:s');
+        $key->status = 'active';
 
         if ($key->create()) {
             return $key;
@@ -260,6 +261,7 @@ class AddressMachinePaymentKey {
     var $service;
     var $paymenttype;
     var $creationdate;
+    var $status; // only "active" implemented so far...
 
     static public function ForStdClass($obj) {
 
@@ -270,6 +272,7 @@ class AddressMachinePaymentKey {
         $key->service = $obj->service;
         $key->paymenttype = $obj->paymenttype;
         $key->creationdate = $obj->creationdate;
+        $key->status = 'active';
 
         return $key;
 
@@ -463,8 +466,9 @@ class AddressMachinePaymentKey {
         $payload->paymenttype = $this->paymenttype;    
         $payload->creationdate = $this->creationdate;    
         $payload->service = $this->service;    
-        $obj->gpg_signed_data = AddressMachinePaymentKey::PayloadSignature($payload);
+        $payload->status = $this->status;
         $obj->payload = $payload;
+        $obj->gpg_signed_data = AddressMachinePaymentKey::PayloadSignature($payload);
         
         return json_encode($obj);
 
@@ -609,6 +613,7 @@ print "\n";
         $this->paymenttype = $payload->paymenttype;    
         $this->creationdate = $payload->creationdate;    
         $this->service = $payload->service;    
+        $this->status = $payload->status;
         $this->gpg_signed_data = $payload->gpg_signed_data;
 
         return true;
