@@ -315,7 +315,7 @@ class AddressMachineTempEmailAction extends AddressMachineEmailAction {
             $text =  "You or someone claiming to be you (".$this->user_email."), asked us to create a temporary Bitcoin address for $identifier so that you can send you some Bitcoins.\n";
             $text .= "\n";
             $text .= "\n";
-            $text. = 'Unfortunately something went wrong in the address creation process and I was unable to do it.'."\n";
+            $text .= 'Unfortunately something went wrong in the address creation process and I was unable to do it.'."\n";
             $text .= "\n";
             $text .= "\n";
             $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
