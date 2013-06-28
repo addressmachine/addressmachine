@@ -292,19 +292,43 @@ class AddressMachineTempEmailAction extends AddressMachineEmailAction {
         // If they have a user key, refuse to return a temp one and give them the user one instead.
         if (!$text && ( count($user_keys) > 0 ) ) {
             // TODO: Think about the method of choosing between multiple keys.
-            $key = $keys[0];
-            $text = 'You can pay '.$identifier .' at '.$key->address.' which is the address they registered.';
+            $key = $user_keys[0];
+
+            $text =  "You or someone claiming to be you (".$this->user_email."), asked us to create a temporary Bitcoin address for $identifier so that you can send you some Bitcoins.\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text = 'We found that they had already registered a Bitcoin address with us, so we are going to give you that instead of creating a temporary one for them.'."\n";
+            $text = 'You can pay '.$identifier .' at '.$user_key->address."\n";
+            $text .= "\n";
+            $text .= "\n";
+
+            $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
+
+
+
         }
 
         // Populate the key with a seed first, and try to DM the user with the seed.
         // Only save the key once we've sent the message to the user.
         // If the message fails we don't want anybody using the address.
         if (!$text && !$key = $id->seededTempKey() ) {
-            $text = 'Sorry, I was unable to create a temporary key for '.$identifier;
+            $text =  "You or someone claiming to be you (".$this->user_email."), asked us to create a temporary Bitcoin address for $identifier so that you can send you some Bitcoins.\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text = 'Unfortunately something went wrong and I was unable to do it.'."\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
         }
 
         if (!$text && ( !$seed = $key->seed || !$address = $key->address) ) {
-            $text = 'Sorry, I was unable to create a temporary key for '.$identifier;
+            $text =  "You or someone claiming to be you (".$this->user_email."), asked us to create a temporary Bitcoin address for $identifier so that you can send you some Bitcoins.\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text = 'Unfortunately something went wrong and I was unable to do it.'."\n";
+            $text .= "\n";
+            $text .= "\n";
+            $text .= ADDRESSMACHINE_EMAIL_FOOTER."\n";
         }
 
         if (!$text) {
