@@ -14,7 +14,7 @@ Goals:
  - Reduce the need for services to hold Bitcoins on behalf of their users by allowing them to send the Bitcoins directly.
  - Give people using our service to run their own service a reasonable expectation that in the event that our service goes away, they'll be able to continue operating their service using another provider.
  - Provide users with as much privacy as is practical given the other goals.
- - Hold as few Bitcoins ourselves as is practical given the other goals.
+ - Hold as few of our users' Bitcoins ourselves as is practical given the other goals, preferably none.
 
 Functions (Those marked with "x" have not been implemented yet):
  o Web action to get an address for an identifier (email / twitter handle), or say if there isn't one.
@@ -23,12 +23,10 @@ Functions (Those marked with "x" have not been implemented yet):
  x API call to get an address for a an identifier (email / twitter handle), or create one if there isn't one already.
  o Register an address from email
  o Unregister an address from email
- o Opt out from email [currently relies on SendGrid]
+ x Permanently opt out from email [currently relies on SendGrid, disabled for now]
  o Register an address from twitter
  o Unregister an address from twitter
- x Opt out from twitter [TODO]
- x Collect Bitcoins for email [TODO]
- x Collect Bitcoins for twitter [TODO]
+ x Permanently opt out from twitter [TODO]
 
 Fees:
  - We don't mind running this service at a modest loss, which is what we expect short-term. We may charge for additional services in future, and we'll charge fees where we want to discourage or limit behaviour.
@@ -56,7 +54,7 @@ Likely future features:
  - Handle electrum-style public keys, and issue transaction-specific addresses, like bitaccept.
 
 Existing services with some similar functionality
- - thewalletlist.org manages Bitcoin addresses for email addresses using a login account.
+ - thewalletlist.com manages Bitcoin addresses for email addresses using a login account.
  - coinapult.com lets you send Bitcoins to an email address. Unlike us they hold the Bitcoins for the user. 
  - bitcointipper.com lets you send Bitcoins to people on Twitter.
 
@@ -69,8 +67,8 @@ Commands (Those marked with "x" have not been implemented yet.)
      o add@addressmachine.com "adfasdfasdfasdfasdf <bitcoin|litecoin|paypal>": Register an address.
      o delete@addressmachine  "adfasdfasdfasdfasdf <bitcoin|litecoin|paypal>": Delete this address and forget about it. 
      x revoke@addressmachine  "adfasdfasdfasdfasdf <bitcoin|litecoin|paypal>": Keep a record that this address is now bad. [TODO]
-     x lookup@addressmachine  "email@example.com" <bitcoin|litecoin|paypal>":  Email me an address for @username. [TODO]
-     x temp@addressmachine    "email@example.com" <bitcoin|litecoin|paypal>":  Look up an address for @username, or make a temporary one if they don't have one.
+     o lookup@addressmachine  "email@example.com" <bitcoin|litecoin|paypal>":  Email me an address for @username. [TODO]
+     o temp@addressmachine    "email@example.com" <bitcoin|litecoin|paypal>":  Look up an address for @username. If they don't have one, create one with electrum, send them the seed and throw it away.
      x die@addressmachine.com 
 
   - Twitter
@@ -80,6 +78,6 @@ Commands (Those marked with "x" have not been implemented yet.)
      x @addressmachine REVOKE adfasdfasdfasdfasdf <bitcoin|litecoin|paypal> - keep a record that this address is now bad. [TODO]
      o @addressmachine LOOKUP @username <bitcoin|litecoin|paypal> tweet me an address for @username
      o @addressmachine @username - a synonym for - @addressmachine LOOKUP @username <bitcoin|litecoin|paypal> 
-     x @addressmachine TEMP @username <bitcoin|litecoin|paypal> look up an address for @username, or make a temporary one if they don't have one. [TODO]
+     x @addressmachine TEMP @username <bitcoin|litecoin|paypal> look up an address for @username, or make a temporary one if they don't have one. [Current method isn't possible - we'd have to store their electrum seed.]
      x @addressmachine DIE - delete all my addresses [TODO]
 
