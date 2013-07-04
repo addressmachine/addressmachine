@@ -355,7 +355,7 @@ class AddressMachineTempEmailAction extends AddressMachineEmailAction {
             $email->user_email = $identifier;
             $email->text = $temp_text;
 
-            if ($email->send()) {
+            if ($email->send() && $id->addTempBitcoinKeyByAddress($address)) {
 
                 $text =  "You or someone claiming to be you (".$this->user_email."), asked us to create a temporary Bitcoin address for $identifier so that you can send you some Bitcoins.\n";
                 $text .= "\n";
